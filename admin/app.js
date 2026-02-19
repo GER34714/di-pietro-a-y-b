@@ -3,7 +3,9 @@
 // =========================
 const SUPABASE_URL = "https://tgzcpnhrqyvldvbbbuen.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_5ww2RCVjjnHS8P1T2n9FZw_wzZr4ZAg";
-const BUCKET = "product-images";
+
+// Usa el bucket que YA existe (el de tu overlay). Si lo queres cambiar despues, cambias solo esto.
+const BUCKET = "imagenes y videos di pietro";
 
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -49,19 +51,22 @@ async function getSession() {
   return sessionUser;
 }
 
+// WHITELIST POR EMAIL (admin_users.email)
 async function checkAdmin() {
-  if (!sessionUser?.id) return false;
+  const email = safeText(sessionUser?.email).toLowerCase();
+  if (!email) return false;
+
   const { data, error } = await supabaseClient
     .from("admin_users")
-    .select("user_id")
-    .eq("user_id", sessionUser.id)
+    .select("email")
+    .eq("email", email)
     .maybeSingle();
 
   if (error) {
     console.error(error);
     return false;
   }
-  return !!data?.user_id;
+  return !!data?.email;
 }
 
 function setStatus(el, msg) {
@@ -83,7 +88,7 @@ async function uploadSelectedFile(file) {
 
   if (!file) {
     setStatus($("productStatus"), "");
-    $("uploadHint").textContent = "Todavía no subiste una imagen.";
+    $("uploadHint").textContent = "Todavia no subiste una imagen.";
     return;
   }
 
@@ -206,7 +211,7 @@ function resetForm() {
   $("category").value = "Otros";
   uploaded = { path: null, publicUrl: null };
   $("publishBtn").disabled = true;
-  $("uploadHint").textContent = "Todavía no subiste una imagen.";
+  $("uploadHint").textContent = "Todavia no subiste una imagen.";
   setStatus($("productStatus"), "");
 }
 
@@ -290,7 +295,7 @@ async function boot() {
 
   if (!sessionUser) {
     showAdminUI(false);
-    setStatus($("authStatus"), "Ingresá con tu usuario admin.");
+    setStatus($("authStatus"), "Ingresa con tu usuario admin.");
     return;
   }
 
@@ -298,13 +303,13 @@ async function boot() {
 
   if (!isAdmin) {
     showAdminUI(false);
-    setStatus($("authStatus"), "No autorizado. Falta tu UID en la tabla admin_users.");
+    setStatus($("authStatus"), "No autorizado. Falta tu email en la tabla admin_users.");
     return;
   }
 
   showAdminUI(true);
   setStatus($("authStatus"), "");
-  setStatus($("productStatus"), "Listo. Subí una imagen (se sube al toque) y publicá.");
+  setStatus($("productStatus"), "Listo. Subi una imagen (se sube al toque) y publica.");
   await renderList();
 }
 
