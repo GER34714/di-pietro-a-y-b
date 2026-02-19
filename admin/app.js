@@ -59,8 +59,7 @@ async function checkAdmin() {
   const { data, error } = await supabaseClient
     .from("admin_users")
     .select("email")
-    .eq("email", email)
-    .maybeSingle();
+.ilike("email", email)    .maybeSingle();
 
   if (error) {
     console.error(error);
