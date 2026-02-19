@@ -4,15 +4,8 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <meta name="theme-color" content="#0b0f17" />
-
   <title>Di Pietro Comercial | Admin</title>
-  <meta name="description" content="Panel admin para cargar productos en el catálogo." />
-
-  <meta property="og:title" content="Di Pietro Comercial | Admin" />
-  <meta property="og:description" content="Panel admin para cargar productos." />
-  <meta property="og:type" content="website" />
-  <meta property="og:image" content="https://iili.io/fm1NjzQ.jpg" />
-
+  <meta name="description" content="Panel admin para cargar productos." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet" />
@@ -20,7 +13,7 @@
 </head>
 
 <body>
-  <div class="bg">
+  <div class="bg" aria-hidden="true">
     <div class="bg-grid"></div>
     <div class="bg-glow"></div>
     <div class="bg-noise"></div>
@@ -29,109 +22,90 @@
   <header class="topbar">
     <div class="wrap topbar__inner">
       <div class="brand">
-        <div class="brand__mark" aria-hidden="true">
-          <div class="mark-dot"></div>
-          <div class="mark-ring"></div>
-        </div>
-        <div class="brand__text">
+        <div class="brand__mark"><img class="brand__logo" src="https://iili.io/q2i8W3x.png" alt="" /></div>
+        <div>
           <div class="brand__name">Admin</div>
-          <div class="brand__sub">Di Pietro Comercial</div>
+          <div class="brand__sub" id="whoami">No autenticado</div>
         </div>
       </div>
-
-      <div class="topActions">
-        <button class="btn btn--soft" id="refresh" type="button">Actualizar</button>
-        <button class="btn btn--danger" id="logout" type="button">Salir</button>
+      <div class="actions">
+        <button class="btn btn--soft" id="btnLogout" type="button" hidden>Cerrar sesion</button>
       </div>
     </div>
   </header>
 
-  <main class="wrap main">
+  <main class="wrap">
     <section class="card" id="authCard">
-      <div class="card__head">
-        <div>
-          <div class="title">Login</div>
-          <div class="muted">Entrá con tu usuario admin de Supabase Auth.</div>
-        </div>
-      </div>
+      <h1 class="title">Ingresar</h1>
+      <p class="muted">Solo usuarios autorizados.</p>
 
-      <form class="form" id="loginForm">
-        <div class="grid2">
-          <div class="field">
-            <label class="label" for="email">Email</label>
-            <input class="input" id="email" type="email" autocomplete="email" required />
-          </div>
-          <div class="field">
-            <label class="label" for="password">Password</label>
-            <input class="input" id="password" type="password" autocomplete="current-password" required />
-          </div>
-        </div>
-
-        <button class="btn btn--primary" type="submit">Entrar</button>
-        <div class="status" id="authStatus"></div>
-      </form>
-    </section>
-
-    <section class="card" id="adminCard" hidden>
-      <div class="card__head">
-        <div>
-          <div class="title">Cargar producto</div>
-          <div class="muted">Seleccionás imagen (se sube al toque) + completás datos + publicar.</div>
-        </div>
-        <div class="chip" id="adminChip">OK</div>
-      </div>
-
-      <form class="form" id="productForm">
-        <div class="grid2">
-          <div class="field">
-            <label class="label" for="file">Cargar imagen</label>
-            <input class="input" id="file" type="file" accept="image/*" required />
-            <div class="hint" id="uploadHint">Todavía no subiste una imagen.</div>
-          </div>
-
-          <div class="field">
-            <label class="label" for="name">Nombre producto</label>
-            <input class="input" id="name" type="text" maxlength="90" required />
-          </div>
-
-          <div class="field">
-            <label class="label" for="price">Precio (ARS)</label>
-            <input class="input" id="price" type="number" min="0" step="1" required />
-          </div>
-
-          <div class="field">
-            <label class="label" for="category">Categoría</label>
-            <input class="input" id="category" type="text" maxlength="40" value="Otros" required />
-          </div>
-        </div>
-
+      <div class="grid2">
         <div class="field">
-          <label class="label" for="desc">Descripción</label>
-          <textarea class="input" id="desc" rows="4" maxlength="240" required></textarea>
+          <label class="label" for="email">Email</label>
+          <input class="input" id="email" type="email" autocomplete="email" placeholder="tu@email.com" />
         </div>
-
-        <div class="grid2">
-          <button class="btn btn--primary" type="submit" id="publishBtn" disabled>Publicar</button>
-          <button class="btn btn--soft" type="button" id="resetBtn">Limpiar</button>
-        </div>
-
-        <div class="status" id="productStatus"></div>
-      </form>
-    </section>
-
-    <section class="card" id="listCard" hidden>
-      <div class="card__head">
-        <div>
-          <div class="title">Productos cargados</div>
-          <div class="muted">Activar/Desactivar y borrar.</div>
+        <div class="field">
+          <label class="label" for="pass">Password</label>
+          <input class="input" id="pass" type="password" autocomplete="current-password" placeholder="••••••••" />
         </div>
       </div>
-      <div class="list" id="list"></div>
+
+      <div class="row">
+        <button class="btn btn--primary" id="btnLogin" type="button">Ingresar</button>
+      </div>
+
+      <div class="note" id="authMsg" hidden></div>
     </section>
 
-    <footer class="footer">
-      <a class="footer__credit" href="https://ciborg347.onrender.com" target="_blank" rel="noopener">Creado y diseñado por Ciborg 347</a>
-    </footer>
+    <section class="card" id="panelCard" hidden>
+      <h2 class="title">Nuevo producto</h2>
+      <p class="muted">Completa los campos y publica.</p>
+
+      <div class="grid3">
+        <div class="field">
+          <label class="label" for="p_name">Nombre</label>
+          <input class="input" id="p_name" type="text" placeholder="Ej: Cocina industrial 4 hornallas" />
+        </div>
+        <div class="field">
+          <label class="label" for="p_price">Precio</label>
+          <input class="input" id="p_price" type="number" inputmode="numeric" placeholder="Ej: 150000" />
+        </div>
+        <div class="field">
+          <label class="label" for="p_category">Categoria</label>
+          <input class="input" id="p_category" type="text" placeholder="Ej: Cocinas" />
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="label" for="p_desc">Descripcion</label>
+        <textarea class="input" id="p_desc" rows="4" placeholder="Descripcion corta y clara..."></textarea>
+      </div>
+
+      <div class="uploader">
+        <div class="uploader__left">
+          <label class="label" for="p_img">Imagen</label>
+          <input class="input" id="p_img" type="file" accept="image/*" />
+          <div class="hint" id="imgHint">Selecciona una imagen. Se ve una vista previa local y luego queda subida.</div>
+          <div class="status" id="imgStatus" hidden></div>
+          <div class="row">
+            <button class="btn btn--soft" id="btnViewRemote" type="button" hidden>Ver imagen subida</button>
+            <button class="btn btn--soft" id="btnClearImage" type="button" hidden>Quitar imagen</button>
+          </div>
+        </div>
+
+        <div class="uploader__right">
+          <div class="preview">
+            <img id="imgPreview" alt="Vista previa" />
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <button class="btn btn--primary" id="btnPublish" type="button" disabled>Publicar</button>
+      </div>
+
+      <div class="note" id="panelMsg" hidden></div>
+    </section>
   </main>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
