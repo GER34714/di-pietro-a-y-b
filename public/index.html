@@ -5,18 +5,18 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <meta name="theme-color" content="#0b0f17" />
 
-  <title>Di Pietro Comercial | Catálogo</title>
-  <meta name="description" content="Catálogo online. Armá tu carrito y enviá el pedido por WhatsApp." />
+  <title>Di Pietro Comercial | Catalogo</title>
+  <meta name="description" content="Catalogo online. Arma tu carrito y envia el pedido por WhatsApp." />
 
-  <meta property="og:title" content="Di Pietro Comercial | Catálogo" />
+  <meta property="og:title" content="Di Pietro Comercial | Catalogo" />
   <meta property="og:description" content="Cocinas industriales e insumos comerciales. Carrito y cierre por WhatsApp." />
   <meta property="og:type" content="website" />
-  <meta property="og:image" content="https://iili.io/fm1NjzQ.jpg" />
+  <meta property="og:image" content="https://iili.io/q2i8W3x.png" />
 
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="Di Pietro Comercial | Catálogo" />
-  <meta name="twitter:description" content="Armá tu carrito y enviá el pedido por WhatsApp." />
-  <meta name="twitter:image" content="https://iili.io/fm1NjzQ.jpg" />
+  <meta name="twitter:title" content="Di Pietro Comercial | Catalogo" />
+  <meta name="twitter:description" content="Arma tu carrito y envia el pedido por WhatsApp." />
+  <meta name="twitter:image" content="https://iili.io/q2i8W3x.png" />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -25,9 +25,10 @@
 </head>
 
 <body>
-  <div class="bg">
+  <div class="bg" aria-hidden="true">
     <div class="bg-grid"></div>
     <div class="bg-glow"></div>
+    <div class="bg-overlay"></div>
     <div class="bg-noise"></div>
   </div>
 
@@ -35,8 +36,7 @@
     <div class="wrap topbar__inner">
       <a class="brand" href="#top" aria-label="Di Pietro Comercial">
         <div class="brand__mark" aria-hidden="true">
-          <div class="mark-dot"></div>
-          <div class="mark-ring"></div>
+          <img class="brand__logo" src="https://iili.io/q2i8W3x.png" alt="" />
         </div>
         <div class="brand__text">
           <div class="brand__name">Di Pietro Comercial</div>
@@ -44,9 +44,9 @@
         </div>
       </a>
 
-      <nav class="nav" aria-label="Navegación">
-        <a class="nav__link" href="#catalogo">Catálogo</a>
-        <a class="nav__link" href="#como">Cómo funciona</a>
+      <nav class="nav" aria-label="Navegacion">
+        <a class="nav__link" href="#catalogo">Catalogo</a>
+        <a class="nav__link" href="#como">Como funciona</a>
         <a class="nav__link" href="#faq">FAQ</a>
 
         <button class="btn btn--primary" id="openCart" type="button">
@@ -54,15 +54,15 @@
           <span class="pill" id="cartCount">0</span>
         </button>
 
-        <button class="hamb" id="hamb" type="button" aria-label="Abrir menú" aria-expanded="false">
+        <button class="hamb" id="hamb" type="button" aria-label="Abrir menu" aria-expanded="false">
           <span></span><span></span><span></span>
         </button>
       </nav>
     </div>
 
     <div class="mobileMenu" id="mobileMenu" hidden>
-      <a href="#catalogo" class="mobileMenu__link">Catálogo</a>
-      <a href="#como" class="mobileMenu__link">Cómo funciona</a>
+      <a href="#catalogo" class="mobileMenu__link">Catalogo</a>
+      <a href="#como" class="mobileMenu__link">Como funciona</a>
       <a href="#faq" class="mobileMenu__link">FAQ</a>
       <button class="btn btn--primary mobileMenu__btn" id="openCartMobile" type="button">
         <span>Abrir carrito</span>
@@ -75,9 +75,9 @@
     <section class="hero">
       <div class="wrap hero__grid">
         <div class="hero__left">
-          <div class="kicker">CATÁLOGO + CIERRE POR WHATSAPP</div>
-          <h1 class="hero__title">Elegís productos, armás tu carrito y enviás el pedido.</h1>
-          <p class="hero__desc">Precios y stock sujetos a confirmación por WhatsApp.</p>
+          <div class="kicker">CATALOGO + CIERRE POR WHATSAPP</div>
+          <h1 class="hero__title">Elegis productos, armas tu carrito y envias el pedido.</h1>
+          <p class="hero__desc">Precios y stock sujetos a confirmacion por WhatsApp.</p>
 
           <div class="hero__cta">
             <a class="btn btn--primary btn--lg" id="ctaWhats" href="#" target="_blank" rel="noopener">Pedir por WhatsApp</a>
@@ -89,43 +89,29 @@
               <div class="bullet__icon">✓</div>
               <div class="bullet__text">
                 <div class="bullet__title">Precio actual</div>
-                <div class="bullet__sub">Confirmación por WhatsApp</div>
+                <div class="bullet__sub">Confirmacion por WhatsApp</div>
               </div>
             </div>
             <div class="bullet">
               <div class="bullet__icon">✓</div>
               <div class="bullet__text">
-                <div class="bullet__title">Garantía</div>
-                <div class="bullet__sub">Según producto</div>
+                <div class="bullet__title">Garantia</div>
+                <div class="bullet__sub">Segun producto</div>
               </div>
             </div>
             <div class="bullet">
               <div class="bullet__icon">✓</div>
               <div class="bullet__text">
                 <div class="bullet__title">Visita con cita</div>
-                <div class="bullet__sub">Coordinación por WhatsApp</div>
+                <div class="bullet__sub">Coordinacion por WhatsApp</div>
               </div>
             </div>
           </div>
         </div>
 
         <div class="hero__right">
-          <div class="heroCard">
-            <div class="heroCard__top">
-              <div class="heroCard__badge">Sistema A (público)</div>
-              <div class="heroCard__mini">
-                <div class="miniLabel">IG</div>
-                <a class="miniLink" id="igLinkTop" href="#" target="_blank" rel="noopener">@dipietro_comercial</a>
-              </div>
-            </div>
-
-            <div class="heroCard__body">
-              <div class="heroCard__hint">
-                <div class="hintTitle">Catálogo autoadministrable</div>
-                <div class="hintText">Cargás productos en el Panel B y se publican acá automáticamente.</div>
-              </div>
-            </div>
-
+          <div class="heroCard heroCard--logo">
+            <img class="heroCard__heroImg" src="https://iili.io/q2i8W3x.png" alt="Di Pietro Comercial" />
             <div class="heroCard__glow"></div>
           </div>
         </div>
@@ -135,8 +121,8 @@
     <section class="catalog" id="catalogo">
       <div class="wrap">
         <div class="sectionHead">
-          <h2 class="sectionTitle">Catálogo</h2>
-          <p class="sectionDesc">Buscá, filtrá, agregá al carrito y enviá tu pedido por WhatsApp.</p>
+          <h2 class="sectionTitle">Catalogo</h2>
+          <p class="sectionDesc">Busca, filtra, agrega al carrito y envia tu pedido por WhatsApp.</p>
         </div>
 
         <div class="filters">
@@ -146,7 +132,7 @@
           </div>
 
           <div class="field">
-            <label class="label" for="cat">Categoría</label>
+            <label class="label" for="cat">Categoria</label>
             <select class="select" id="cat">
               <option value="all">Todas</option>
             </select>
@@ -155,7 +141,7 @@
           <div class="field">
             <label class="label" for="sort">Orden</label>
             <select class="select" id="sort">
-              <option value="new">Más nuevos</option>
+              <option value="new">Mas nuevos</option>
               <option value="priceAsc">Menor precio</option>
               <option value="priceDesc">Mayor precio</option>
               <option value="nameAsc">Nombre A-Z</option>
@@ -171,7 +157,7 @@
 
         <div class="empty" id="empty" hidden>
           <div class="empty__title">No hay productos para mostrar</div>
-          <div class="empty__desc">Cargalos desde el Panel B (admin) y aparecen acá.</div>
+          <div class="empty__desc">En breve vas a ver productos disponibles en el catalogo.</div>
         </div>
       </div>
     </section>
@@ -179,15 +165,15 @@
     <section class="how" id="como">
       <div class="wrap">
         <div class="sectionHead">
-          <h2 class="sectionTitle">Cómo funciona</h2>
+          <h2 class="sectionTitle">Como funciona</h2>
           <p class="sectionDesc">Proceso simple y directo para cerrar por WhatsApp.</p>
         </div>
 
         <div class="bento">
-          <div class="bentoCard"><div class="bentoTitle">1) Elegís</div><div class="bentoText">Agregás productos y cantidades.</div></div>
-          <div class="bentoCard"><div class="bentoTitle">2) Carrito</div><div class="bentoText">Ves total y revisás tu pedido.</div></div>
-          <div class="bentoCard"><div class="bentoTitle">3) Enviás</div><div class="bentoText">WhatsApp sale con el listado listo.</div></div>
-          <div class="bentoCard"><div class="bentoTitle">4) Confirmación</div><div class="bentoText">Se confirma stock y entrega.</div></div>
+          <div class="bentoCard"><div class="bentoTitle">1) Elegis</div><div class="bentoText">Agregas productos y cantidades.</div></div>
+          <div class="bentoCard"><div class="bentoTitle">2) Carrito</div><div class="bentoText">Ves total y revisas tu pedido.</div></div>
+          <div class="bentoCard"><div class="bentoTitle">3) Envias</div><div class="bentoText">WhatsApp sale con el listado listo.</div></div>
+          <div class="bentoCard"><div class="bentoTitle">4) Confirmacion</div><div class="bentoText">Se confirma stock y entrega.</div></div>
         </div>
       </div>
     </section>
@@ -196,13 +182,13 @@
       <div class="wrap">
         <div class="sectionHead">
           <h2 class="sectionTitle">Preguntas frecuentes</h2>
-          <p class="sectionDesc">Respuestas cortas para decidir rápido.</p>
+          <p class="sectionDesc">Respuestas cortas para decidir rapido.</p>
         </div>
 
         <div class="accordion">
-          <details class="acc"><summary>¿Cómo compro?</summary><div class="acc__body">Agregás al carrito y tocás “Enviar pedido por WhatsApp”.</div></details>
-          <details class="acc"><summary>¿Los precios son finales?</summary><div class="acc__body">Se confirman por WhatsApp al momento del pedido.</div></details>
-          <details class="acc"><summary>¿Hacen envíos?</summary><div class="acc__body">Se coordina por WhatsApp según zona y producto.</div></details>
+          <details class="acc"><summary>Como compro?</summary><div class="acc__body">Agregas al carrito y tocas "Enviar pedido por WhatsApp".</div></details>
+          <details class="acc"><summary>Los precios son finales?</summary><div class="acc__body">Se confirman por WhatsApp al momento del pedido.</div></details>
+          <details class="acc"><summary>Hacen envios?</summary><div class="acc__body">Se coordina por WhatsApp segun zona y producto.</div></details>
         </div>
       </div>
     </section>
