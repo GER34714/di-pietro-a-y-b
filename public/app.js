@@ -1,6 +1,3 @@
-// =========================
-// CONFIG
-// =========================
 const SUPABASE_URL = "https://tgzcpnhrqyvldvbbbuen.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_5ww2RCVjjnHS8P1T2n9FZw_wzZr4ZAg";
 const WHATSAPP_NUMBER = "5491164312020";
@@ -8,9 +5,6 @@ const INSTAGRAM_URL = "https://www.instagram.com/dipietro_comercial?igsh=MW50cGR
 
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// =========================
-// HELPERS
-// =========================
 const $ = (id) => document.getElementById(id);
 
 function moneyARS(n) {
@@ -26,22 +20,13 @@ function safeText(s) {
   return (s || "").toString().trim();
 }
 
-// =========================
-// STATE
-// =========================
 let allProducts = [];
 let filtered = [];
 
 const CART_KEY = "dp_cart_v1";
-function loadCart() {
-  try { return JSON.parse(localStorage.getItem(CART_KEY) || "{}"); } catch { return {}; }
-}
-function saveCart(cart) {
-  localStorage.setItem(CART_KEY, JSON.stringify(cart));
-}
-function cartCount(cart) {
-  return Object.values(cart).reduce((a, b) => a + (b?.qty || 0), 0);
-}
+function loadCart() { try { return JSON.parse(localStorage.getItem(CART_KEY) || "{}"); } catch { return {}; } }
+function saveCart(cart) { localStorage.setItem(CART_KEY, JSON.stringify(cart)); }
+function cartCount(cart) { return Object.values(cart).reduce((a, b) => a + (b?.qty || 0), 0); }
 function cartTotal(cart) {
   let total = 0;
   for (const k of Object.keys(cart)) {
@@ -51,14 +36,10 @@ function cartTotal(cart) {
   return total;
 }
 
-// =========================
-// UI INIT
-// =========================
 function initLinks() {
   $("waFloat").href = `https://wa.me/${WHATSAPP_NUMBER}`;
   $("waLinkFooter").href = `https://wa.me/${WHATSAPP_NUMBER}`;
   $("ctaWhats").href = `https://wa.me/${WHATSAPP_NUMBER}`;
-  $("igLinkTop").href = INSTAGRAM_URL;
   $("igLinkFooter").href = INSTAGRAM_URL;
 }
 
@@ -75,14 +56,11 @@ function initMenu() {
       hamb.setAttribute("aria-expanded", "true");
     }
   });
-
   const closeMenu = () => {
     if (!menu.hasAttribute("hidden")) menu.setAttribute("hidden", "");
     hamb.setAttribute("aria-expanded", "false");
   };
-  menu.addEventListener("click", (e) => {
-    if (e.target && e.target.matches("a")) closeMenu();
-  });
+  menu.addEventListener("click", (e) => { if (e.target && e.target.matches("a")) closeMenu(); });
 }
 
 function initCartUI() {
@@ -188,9 +166,6 @@ function renderCart() {
   }
 }
 
-// =========================
-// PRODUCTS
-// =========================
 async function fetchProducts() {
   const { data, error } = await supabaseClient
     .from("products")
@@ -309,14 +284,10 @@ function renderGrid() {
   }
 }
 
-// =========================
-// INIT
-// =========================
 async function main() {
   initLinks();
   initMenu();
   initCartUI();
-
   updateCartBadges();
 
   await fetchProducts();
