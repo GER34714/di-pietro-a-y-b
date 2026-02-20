@@ -1,13 +1,15 @@
-<!-- =========================
-/public/index.html
-========================= -->
+<!-- /public/index.html -->
 <!doctype html>
 <html lang="es-AR">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Catalogo Premium | Pedido por WhatsApp</title>
-  <meta name="description" content="Catalogo premium. Arma tu pedido y finaliza por WhatsApp." />
+  <title>Di Pietro | Catalogo premium</title>
+  <meta name="description" content="Catalogo premium. Armá tu pedido y finalizá por WhatsApp." />
+  <meta property="og:title" content="Di Pietro Cocinas industriales e insumos comerciales" />
+  <meta property="og:description" content="Cocinas industriales con horno pizzero. Garantia 6 meses. Se abona cuando llega a tu domicilio." />
+  <meta property="og:image" content="https://iili.io/q33l7Uu.png" />
+  <meta property="og:type" content="website" />
   <link rel="stylesheet" href="./styles.css" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
@@ -15,13 +17,14 @@
   <header class="topbar">
     <div class="wrap topbar__inner">
       <div class="brand">
-        <div class="brand__title" id="brandTitle">Catalogo</div>
-        <div class="brand__subtitle">Pedido directo por WhatsApp</div>
+        <div class="brand__title" id="brandTitle">Di Pietro Cocinas industriales e insumos comerciales</div>
+        <div class="brand__subtitle" id="brandSubtitle">Escobar | Pedido por WhatsApp</div>
       </div>
 
       <nav class="nav" id="nav">
-        <a href="#catalogo" class="nav__link">Catalogo</a>
+        <a href="#catalogo" class="nav__link">Productos</a>
         <a href="#ofertas" class="nav__link">Ofertas</a>
+        <a href="#como" class="nav__link">Como comprar</a>
         <button id="openCartBtn" class="nav__cart" type="button">
           Carrito <span id="cartCount" class="badge">0</span>
         </button>
@@ -33,8 +36,9 @@
     </div>
 
     <div class="mobileMenu" id="mobileMenu" aria-hidden="true">
-      <a href="#catalogo" class="mobileMenu__link" data-close>Catalogo</a>
+      <a href="#catalogo" class="mobileMenu__link" data-close>Productos</a>
       <a href="#ofertas" class="mobileMenu__link" data-close>Ofertas</a>
+      <a href="#como" class="mobileMenu__link" data-close>Como comprar</a>
       <button class="mobileMenu__link mobileMenu__btn" id="openCartBtnMobile" type="button" data-close>
         Carrito <span id="cartCountMobile" class="badge">0</span>
       </button>
@@ -46,8 +50,16 @@
       <div class="wrap hero__inner">
         <div class="heroCard">
           <div class="heroCard__text">
-            <h1>Catalogo premium</h1>
-            <p>Elegis productos, armas el carrito y finalizas por WhatsApp.</p>
+            <span class="pill">Cita previa | Atencion 9 a 13 / 15 a 18</span>
+            <h1 id="heroTitle">Di Pietro Cocinas industriales e insumos comerciales</h1>
+            <p id="heroText">Cocinas industriales con horno pizzero. Garantia de 6 meses. Se abona cuando llega a tu domicilio.</p>
+
+            <div class="heroBadges">
+              <div class="mini">Escobar</div>
+              <div class="mini">Transferencia o efectivo</div>
+              <div class="mini">Envio y retiro</div>
+            </div>
+
             <div class="heroCard__cta">
               <a href="#catalogo" class="btn btn--primary">Ver productos</a>
               <button id="openCartBtnHero" class="btn btn--ghost" type="button">Ver carrito</button>
@@ -61,10 +73,35 @@
       </div>
     </section>
 
+    <section class="wrap section section--soft">
+      <div class="section__head">
+        <h2>Por que comprar aca</h2>
+        <p class="muted">Simple, claro y sin vueltas.</p>
+      </div>
+
+      <div class="steps">
+        <div class="step">
+          <div class="step__n">1</div>
+          <div class="step__t">Garantia 6 meses</div>
+          <div class="step__d">Compra con respaldo. Equipos pensados para laburo real.</div>
+        </div>
+        <div class="step">
+          <div class="step__n">2</div>
+          <div class="step__t">Pago en entrega</div>
+          <div class="step__d">Transferencia o efectivo. Se abona cuando llega a tu domicilio.</div>
+        </div>
+        <div class="step">
+          <div class="step__n">3</div>
+          <div class="step__t">Visita con cita previa</div>
+          <div class="step__d">Coordinamos por WhatsApp en el horario de atencion.</div>
+        </div>
+      </div>
+    </section>
+
     <section id="catalogo" class="wrap section">
       <div class="section__head">
         <h2>Productos</h2>
-        <p class="muted">Mostrando productos activos.</p>
+        <p class="muted">Mostrando productos activos. Elegi y arma tu pedido.</p>
       </div>
 
       <div class="toolbar">
@@ -95,6 +132,7 @@
       <section id="ofertas" class="offers" aria-label="Ofertas" style="display:none">
         <div class="offers__head">
           <h3>Ofertas</h3>
+          <p class="muted">Toca para ver detalle y agregar al carrito.</p>
           <div class="offers__controls">
             <button class="iconBtn" id="offersPrev" type="button" aria-label="Anterior">‹</button>
             <button class="iconBtn" id="offersNext" type="button" aria-label="Siguiente">›</button>
@@ -109,6 +147,39 @@
         <button id="moreBtn" class="btn btn--ghost" type="button">Ver mas</button>
       </div>
     </section>
+
+    <section id="como" class="wrap section section--soft">
+      <div class="section__head">
+        <h2>Como comprar</h2>
+        <p class="muted">En 30 segundos.</p>
+      </div>
+
+      <div class="steps">
+        <div class="step">
+          <div class="step__n">1</div>
+          <div class="step__t">Elegis productos</div>
+          <div class="step__d">Tocas una card para ver detalle y sumas al carrito.</div>
+        </div>
+        <div class="step">
+          <div class="step__n">2</div>
+          <div class="step__t">Revisas el total</div>
+          <div class="step__d">El carrito calcula todo y te deja ajustar cantidades.</div>
+        </div>
+        <div class="step">
+          <div class="step__n">3</div>
+          <div class="step__t">Finalizas por WhatsApp</div>
+          <div class="step__d">Se abre WhatsApp con el pedido armado, listo para enviar.</div>
+        </div>
+      </div>
+
+      <div class="ctaBox">
+        <div class="ctaBox__text">
+          <div class="ctaBox__title">Listo para pedir?</div>
+          <div class="ctaBox__desc">Armá el carrito y finalizá por WhatsApp.</div>
+        </div>
+        <button class="btn btn--primary" id="ctaGoCart" type="button">Ir al carrito</button>
+      </div>
+    </section>
   </main>
 
   <aside id="cartDrawer" class="drawer" aria-hidden="true">
@@ -117,7 +188,7 @@
     <div class="drawer__panel">
       <div class="drawer__header">
         <div class="drawer__title">Tu carrito</div>
-        <button id="closeCartBtn" class="iconBtn" type="button" aria-label="Cerrar">✕</button>
+        <button id="closeCartBtn" class="iconBtn" type="button" aria-label="Cerrar">X</button>
       </div>
 
       <div id="cartItems" class="cartItems"></div>
@@ -128,21 +199,36 @@
           <strong id="cartTotal">$0</strong>
         </div>
 
-        <button id="checkoutBtn" class="btn btn--primary" type="button">
-          Finalizar pedido por WhatsApp
-        </button>
-
-        <div class="hint">Se abre WhatsApp con el pedido armado.</div>
+        <button id="checkoutBtn" class="btn btn--primary" type="button">Finalizar pedido por WhatsApp</button>
+        <div class="hint">Pago: transferencia o efectivo. Se abona al recibir.</div>
       </div>
     </div>
   </aside>
+
+  <div class="stickyBar" id="stickyBar" aria-hidden="false">
+    <button class="stickyBar__cart" id="stickyCartBtn" type="button">
+      <span>Carrito</span>
+      <span class="stickyBar__right">
+        <span id="stickyItems">0</span>
+        <span class="dot">•</span>
+        <strong id="stickyTotal">$0</strong>
+      </span>
+    </button>
+    <button class="stickyBar__cta" id="stickyCheckoutBtn" type="button">Finalizar</button>
+  </div>
+
+  <a class="waFloat" id="waFloat" href="#" target="_blank" rel="noopener" aria-label="WhatsApp">
+    <svg viewBox="0 0 32 32" width="22" height="22" aria-hidden="true">
+      <path fill="currentColor" d="M19.11 17.2c-.26-.13-1.55-.77-1.79-.86-.24-.09-.41-.13-.59.13-.17.26-.68.86-.84 1.04-.15.17-.3.2-.56.07-.26-.13-1.1-.41-2.09-1.3-.77-.69-1.29-1.54-1.44-1.8-.15-.26-.02-.4.11-.53.12-.12.26-.3.39-.45.13-.15.17-.26.26-.43.09-.17.04-.33-.02-.45-.06-.13-.59-1.42-.81-1.95-.21-.5-.43-.43-.59-.44l-.5-.01c-.17 0-.45.06-.69.33-.24.26-.9.88-.9 2.14 0 1.26.92 2.48 1.05 2.65.13.17 1.81 2.76 4.38 3.87.61.26 1.09.42 1.46.54.61.19 1.16.16 1.6.1.49-.07 1.55-.63 1.77-1.24.22-.61.22-1.13.15-1.24-.06-.11-.24-.17-.5-.3zM16 3.2C9.37 3.2 4 8.57 4 15.2c0 2.12.55 4.11 1.52 5.84L4 28.8l7.95-1.49c1.64.89 3.52 1.39 5.52 1.39 6.63 0 12-5.37 12-12S22.63 3.2 16 3.2zm0 22.13c-1.82 0-3.51-.5-4.96-1.37l-.36-.21-4.72.88.9-4.59-.23-.38A9.94 9.94 0 0 1 6.2 15.2c0-5.4 4.4-9.8 9.8-9.8 5.4 0 9.8 4.4 9.8 9.8 0 5.4-4.4 9.8-9.8 9.8z"/>
+    </svg>
+  </a>
 
   <div id="modal" class="modal" aria-hidden="true">
     <button id="modalBackdrop" class="modal__backdrop" type="button" aria-label="Cerrar"></button>
     <div class="modal__panel" role="dialog" aria-modal="true">
       <div class="modal__header">
         <div class="modal__title" id="modalTitle">Producto</div>
-        <button id="modalClose" class="iconBtn" type="button" aria-label="Cerrar">✕</button>
+        <button id="modalClose" class="iconBtn" type="button" aria-label="Cerrar">X</button>
       </div>
 
       <div class="modal__content">
@@ -165,6 +251,8 @@
             <button class="btn btn--primary" id="modalAdd" type="button">Agregar al carrito</button>
             <button class="btn btn--ghost" id="modalGoCart" type="button">Ver carrito</button>
           </div>
+
+          <div class="muted" style="margin-top:10px">Pago: transferencia o efectivo. Se abona al recibir. Visita con cita previa.</div>
         </div>
       </div>
     </div>
@@ -172,7 +260,7 @@
 
   <footer class="footer">
     <div class="wrap footer__inner">
-      <small>Catalogo autoadministrable (Supabase) | Checkout por WhatsApp</small>
+      <small>Di Pietro | Escobar | 9 a 13 / 15 a 18</small>
     </div>
   </footer>
 
