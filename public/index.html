@@ -1,241 +1,169 @@
-<!-- public/index.html -->
+<!-- =========================
+/public/index.html
+========================= -->
 <!doctype html>
 <html lang="es-AR">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <meta name="theme-color" content="#0b0f17" />
-
-  <title>Di Pietro Comercial | Catalogo</title>
-  <meta name="description" content="Catalogo online. Arma tu carrito y envia el pedido por WhatsApp." />
-
-  <meta property="og:title" content="Di Pietro Comercial | Catalogo" />
-  <meta property="og:description" content="Cocinas industriales, sommiers, placares e insumos. Carrito y cierre por WhatsApp." />
-  <meta property="og:type" content="website" />
-  <meta property="og:image" content="https://iili.io/q2i8W3x.png" />
-
-  <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="Di Pietro Comercial | Catalogo" />
-  <meta name="twitter:description" content="Arma tu carrito y envia el pedido por WhatsApp." />
-  <meta name="twitter:image" content="https://iili.io/q2i8W3x.png" />
-
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Catalogo Premium | Pedido por WhatsApp</title>
+  <meta name="description" content="Catalogo premium. Arma tu pedido y finaliza por WhatsApp." />
   <link rel="stylesheet" href="./styles.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
-
 <body>
-  <div class="bg" aria-hidden="true">
-    <div class="bg-grid"></div>
-    <div class="bg-glow"></div>
-    <div class="bg-overlay"></div>
-    <div class="bg-noise"></div>
-  </div>
-
-  <header class="topbar" id="top">
+  <header class="topbar">
     <div class="wrap topbar__inner">
-      <a class="brand" href="#top" aria-label="Di Pietro Comercial">
-        <div class="brand__mark" aria-hidden="true">
-          <img class="brand__logo" src="https://iili.io/q2i8W3x.png" alt="" />
-        </div>
-        <div class="brand__text">
-          <div class="brand__name">Di Pietro Comercial</div>
-          <div class="brand__sub">Cocinas | Sommiers | Placares | Insumos</div>
-        </div>
-      </a>
+      <div class="brand">
+        <div class="brand__title" id="brandTitle">Catalogo</div>
+        <div class="brand__subtitle">Pedido directo por WhatsApp</div>
+      </div>
 
-      <nav class="nav" aria-label="Navegacion">
-        <a class="nav__link" href="#ofertas">Ofertas</a>
-        <a class="nav__link" href="#catalogo">Catalogo</a>
-        <a class="nav__link" href="#como">Como funciona</a>
-
-        <button class="btn btn--primary" id="openCart" type="button">
-          <span>Carrito</span>
-          <span class="pill" id="cartCount">0</span>
-        </button>
-
-        <button class="hamb" id="hamb" type="button" aria-label="Abrir menu" aria-expanded="false">
-          <span></span><span></span><span></span>
+      <nav class="nav" id="nav">
+        <a href="#catalogo" class="nav__link">Catalogo</a>
+        <a href="#ofertas" class="nav__link">Ofertas</a>
+        <button id="openCartBtn" class="nav__cart" type="button">
+          Carrito <span id="cartCount" class="badge">0</span>
         </button>
       </nav>
+
+      <button id="burgerBtn" class="burger" type="button" aria-label="Menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
     </div>
 
-    <div class="mobileMenu" id="mobileMenu" hidden>
-      <a href="#ofertas" class="mobileMenu__link">Ofertas</a>
-      <a href="#catalogo" class="mobileMenu__link">Catalogo</a>
-      <a href="#como" class="mobileMenu__link">Como funciona</a>
-      <button class="btn btn--primary mobileMenu__btn" id="openCartMobile" type="button">
-        <span>Abrir carrito</span>
-        <span class="pill" id="cartCountMobile">0</span>
+    <div class="mobileMenu" id="mobileMenu" aria-hidden="true">
+      <a href="#catalogo" class="mobileMenu__link" data-close>Catalogo</a>
+      <a href="#ofertas" class="mobileMenu__link" data-close>Ofertas</a>
+      <button class="mobileMenu__link mobileMenu__btn" id="openCartBtnMobile" type="button" data-close>
+        Carrito <span id="cartCountMobile" class="badge">0</span>
       </button>
     </div>
   </header>
 
   <main>
     <section class="hero">
-      <div class="wrap hero__grid">
-        <div class="hero__left">
-          <div class="kicker">CATALOGO + CIERRE POR WHATSAPP</div>
-          <h1 class="hero__title">Elegis, armas tu carrito y envias el pedido.</h1>
-          <p class="hero__desc">Precios y stock sujetos a confirmacion por WhatsApp. Respuesta rapida y coordinacion directa.</p>
-
-          <div class="hero__cta">
-            <a class="btn btn--primary btn--lg" id="ctaWhats" href="#" target="_blank" rel="noopener">Pedir por WhatsApp</a>
-            <a class="btn btn--soft btn--lg" href="#catalogo">Ver catalogo</a>
-          </div>
-
-          <div class="hero__bullets">
-            <div class="bullet"><div class="bullet__icon">✓</div><div><div class="bullet__title">Confirmacion</div><div class="bullet__sub">Stock y precio al momento</div></div></div>
-            <div class="bullet"><div class="bullet__icon">✓</div><div><div class="bullet__title">Entrega</div><div class="bullet__sub">Se coordina por WhatsApp</div></div></div>
-            <div class="bullet"><div class="bullet__icon">✓</div><div><div class="bullet__title">Asesoramiento</div><div class="bullet__sub">Te ayudamos a elegir</div></div></div>
-          </div>
-        </div>
-
-        <div class="hero__right">
-          <div class="heroCard">
-            <div class="heroCard__top">
-              <div class="heroCard__badge">LISTO PARA PEDIR</div>
+      <div class="wrap hero__inner">
+        <div class="heroCard">
+          <div class="heroCard__text">
+            <h1>Catalogo premium</h1>
+            <p>Elegis productos, armas el carrito y finalizas por WhatsApp.</p>
+            <div class="heroCard__cta">
+              <a href="#catalogo" class="btn btn--primary">Ver productos</a>
+              <button id="openCartBtnHero" class="btn btn--ghost" type="button">Ver carrito</button>
             </div>
-            <img class="heroCard__heroImg" src="https://iili.io/q2i8W3x.png" alt="Di Pietro Comercial" />
-            <div class="heroCard__glow"></div>
+          </div>
+
+          <div class="heroCard__media">
+            <img src="https://iili.io/q33l7Uu.png" alt="Hero" loading="eager" />
           </div>
         </div>
       </div>
     </section>
 
-    <section class="offers" id="ofertas">
-      <div class="wrap">
-        <div class="sectionHead">
-          <h2 class="sectionTitle">Ofertas del mes</h2>
-          <p class="sectionDesc">Desliza y toca para ver el detalle.</p>
+    <section id="catalogo" class="wrap section">
+      <div class="section__head">
+        <h2>Productos</h2>
+        <p class="muted">Mostrando productos activos.</p>
+      </div>
+
+      <div class="toolbar">
+        <div class="field">
+          <label for="categorySelect">Categoria</label>
+          <select id="categorySelect">
+            <option value="__all__">Todas</option>
+          </select>
         </div>
 
-        <div class="offersRail" id="offersRail" aria-label="Carrusel de ofertas"></div>
+        <div class="field">
+          <label for="searchInput">Buscar</label>
+          <input id="searchInput" type="search" placeholder="Nombre o descripcion..." />
+        </div>
 
-        <div class="offersEmpty" id="offersEmpty" hidden>
-          No hay ofertas cargadas. Marca productos con badge "oferta" en Supabase para que aparezcan aca.
+        <div class="field field--small">
+          <label for="sortSelect">Orden</label>
+          <select id="sortSelect">
+            <option value="new">Mas nuevos</option>
+            <option value="price_asc">Menor precio</option>
+            <option value="price_desc">Mayor precio</option>
+          </select>
         </div>
       </div>
-    </section>
 
-    <section class="catalog" id="catalogo">
-      <div class="wrap">
-        <div class="sectionHead">
-          <h2 class="sectionTitle">Catalogo</h2>
-          <p class="sectionDesc">Busca, filtra y toca un producto para ver la ficha completa.</p>
-        </div>
+      <div id="stateBox" class="state" aria-live="polite"></div>
 
-        <div class="filters">
-          <div class="field">
-            <label class="label" for="q">Buscar</label>
-            <input class="input" id="q" type="search" placeholder="Ej: cocina, sommier, placard..." autocomplete="off" />
-          </div>
-
-          <div class="field">
-            <label class="label" for="cat">Categoria</label>
-            <select class="select" id="cat">
-              <option value="all">Todas</option>
-            </select>
-          </div>
-
-          <div class="field">
-            <label class="label" for="sort">Orden</label>
-            <select class="select" id="sort">
-              <option value="new">Mas nuevos</option>
-              <option value="priceAsc">Menor precio</option>
-              <option value="priceDesc">Mayor precio</option>
-              <option value="nameAsc">Nombre A-Z</option>
-            </select>
-          </div>
-
-          <div class="field field--actions">
-            <button class="btn btn--soft" id="clearFilters" type="button">Limpiar</button>
+      <section id="ofertas" class="offers" aria-label="Ofertas" style="display:none">
+        <div class="offers__head">
+          <h3>Ofertas</h3>
+          <div class="offers__controls">
+            <button class="iconBtn" id="offersPrev" type="button" aria-label="Anterior">‹</button>
+            <button class="iconBtn" id="offersNext" type="button" aria-label="Siguiente">›</button>
           </div>
         </div>
+        <div class="offers__track" id="offersTrack"></div>
+      </section>
 
-        <div class="grid" id="grid"></div>
+      <div id="grid" class="grid" aria-live="polite"></div>
 
-        <div class="empty" id="empty" hidden>
-          <div class="empty__title">No hay productos para mostrar</div>
-          <div class="empty__desc">Proba con otro filtro o mas tarde.</div>
-        </div>
-      </div>
-    </section>
-
-    <section class="how" id="como">
-      <div class="wrap">
-        <div class="sectionHead">
-          <h2 class="sectionTitle">Como funciona</h2>
-          <p class="sectionDesc">Proceso simple para cerrar por WhatsApp.</p>
-        </div>
-
-        <div class="bento">
-          <div class="bentoCard"><div class="bentoTitle">1) Elegis</div><div class="bentoText">Busca y toca un producto para ver la ficha.</div></div>
-          <div class="bentoCard"><div class="bentoTitle">2) Carrito</div><div class="bentoText">Agrega cantidades y revisa el total.</div></div>
-          <div class="bentoCard"><div class="bentoTitle">3) Enviar</div><div class="bentoText">Se arma el mensaje listo para WhatsApp.</div></div>
-          <div class="bentoCard"><div class="bentoTitle">4) Confirmacion</div><div class="bentoText">Confirmamos stock, precio y entrega.</div></div>
-        </div>
+      <div class="moreWrap" id="moreWrap" style="display:none">
+        <button id="moreBtn" class="btn btn--ghost" type="button">Ver mas</button>
       </div>
     </section>
   </main>
 
-  <a class="waFloat" id="waFloat" href="#" target="_blank" rel="noopener" aria-label="WhatsApp">
-    <img src="https://iili.io/fm1NjzQ.jpg" alt="WhatsApp" />
-  </a>
+  <aside id="cartDrawer" class="drawer" aria-hidden="true">
+    <button id="drawerBackdrop" class="drawer__backdrop" type="button" aria-label="Cerrar"></button>
 
-  <div class="drawer" id="drawer" aria-hidden="true">
-    <div class="drawer__backdrop" id="drawerBackdrop"></div>
-    <div class="drawer__panel" role="dialog" aria-modal="true" aria-label="Carrito">
-      <div class="drawer__head">
-        <div>
-          <div class="drawer__title">Carrito</div>
-          <div class="drawer__sub" id="drawerSub">0 items</div>
-        </div>
-        <button class="iconBtn" id="closeCart" type="button" aria-label="Cerrar carrito">X</button>
+    <div class="drawer__panel">
+      <div class="drawer__header">
+        <div class="drawer__title">Tu carrito</div>
+        <button id="closeCartBtn" class="iconBtn" type="button" aria-label="Cerrar">✕</button>
       </div>
 
-      <div class="drawer__body" id="cartItems"></div>
+      <div id="cartItems" class="cartItems"></div>
 
-      <div class="drawer__foot">
-        <div class="total">
-          <div class="total__label">Total</div>
-          <div class="total__value" id="cartTotal">$ 0</div>
+      <div class="drawer__footer">
+        <div class="totalRow">
+          <span>Total</span>
+          <strong id="cartTotal">$0</strong>
         </div>
-        <button class="btn btn--primary btn--lg w100" id="sendWhats" type="button">Enviar pedido por WhatsApp</button>
-        <button class="btn btn--soft w100" id="clearCart" type="button">Vaciar carrito</button>
+
+        <button id="checkoutBtn" class="btn btn--primary" type="button">
+          Finalizar pedido por WhatsApp
+        </button>
+
+        <div class="hint">Se abre WhatsApp con el pedido armado.</div>
       </div>
     </div>
-  </div>
+  </aside>
 
-  <div class="modal" id="modal" aria-hidden="true">
-    <div class="modal__backdrop" id="modalBackdrop"></div>
-    <div class="modal__panel" role="dialog" aria-modal="true" aria-label="Detalle del producto">
-      <div class="modal__top">
-        <div class="modal__title" id="mTitle">Producto</div>
-        <button class="iconBtn" id="modalClose" type="button" aria-label="Cerrar">X</button>
+  <div id="modal" class="modal" aria-hidden="true">
+    <button id="modalBackdrop" class="modal__backdrop" type="button" aria-label="Cerrar"></button>
+    <div class="modal__panel" role="dialog" aria-modal="true">
+      <div class="modal__header">
+        <div class="modal__title" id="modalTitle">Producto</div>
+        <button id="modalClose" class="iconBtn" type="button" aria-label="Cerrar">✕</button>
       </div>
 
       <div class="modal__content">
-        <div class="mGallery">
-          <button class="mNav mNav--l" id="mPrev" type="button" aria-label="Anterior">‹</button>
-          <div class="mStage">
-            <img id="mImg" alt="Imagen del producto" />
+        <div class="zoomBox">
+          <div class="zoomBox__viewport" id="zoomViewport">
+            <img id="modalImg" alt="" />
           </div>
-          <button class="mNav mNav--r" id="mNext" type="button" aria-label="Siguiente">›</button>
+          <div class="zoomBox__controls">
+            <button class="btn btn--ghost" id="zoomOut" type="button">-</button>
+            <button class="btn btn--ghost" id="zoomReset" type="button">Reset</button>
+            <button class="btn btn--ghost" id="zoomIn" type="button">+</button>
+          </div>
         </div>
 
-        <div class="mThumbs" id="mThumbs"></div>
+        <div class="modal__info">
+          <div class="modal__price" id="modalPrice">$0</div>
+          <div class="modal__desc" id="modalDesc"></div>
 
-        <div class="mInfo">
-          <div class="mBadges" id="mBadges"></div>
-          <div class="mPrice" id="mPrice">$ 0</div>
-          <div class="mCat" id="mCat"></div>
-          <div class="mDesc" id="mDesc"></div>
-
-          <div class="mActions">
-            <button class="btn btn--primary" id="mAdd" type="button">Agregar al carrito</button>
-            <button class="btn btn--soft" id="mAsk" type="button">Consultar</button>
+          <div class="modal__actions">
+            <button class="btn btn--primary" id="modalAdd" type="button">Agregar al carrito</button>
+            <button class="btn btn--ghost" id="modalGoCart" type="button">Ver carrito</button>
           </div>
         </div>
       </div>
@@ -244,20 +172,10 @@
 
   <footer class="footer">
     <div class="wrap footer__inner">
-      <div class="footer__left">
-        <div class="footer__brand">Di Pietro Comercial</div>
-        <div class="footer__muted">Cocinas | Sommiers | Placares | Insumos</div>
-      </div>
-
-      <div class="footer__right">
-        <a class="footer__link" id="igLinkFooter" href="#" target="_blank" rel="noopener">Instagram</a>
-        <a class="footer__link" id="waLinkFooter" href="#" target="_blank" rel="noopener">WhatsApp</a>
-        <a class="footer__credit" href="https://ciborg347.onrender.com" target="_blank" rel="noopener">Creado y diseñado por Ciborg 347</a>
-      </div>
+      <small>Catalogo autoadministrable (Supabase) | Checkout por WhatsApp</small>
     </div>
   </footer>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="./app.js"></script>
 </body>
 </html>
