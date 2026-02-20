@@ -1,12 +1,10 @@
-<!-- =========================
-/admin/index.html
-========================= -->
+<!-- /admin/index.html -->
 <!doctype html>
 <html lang="es-AR">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Admin | Catalogo</title>
+  <title>Admin | Di Pietro</title>
   <meta name="description" content="Panel admin: productos + imagenes." />
   <link rel="stylesheet" href="./styles.css" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -16,7 +14,7 @@
     <div class="wrap topbar__inner">
       <div class="brand">
         <div class="brand__title">Admin</div>
-        <div class="brand__subtitle">Gestion de productos</div>
+        <div class="brand__subtitle">Di Pietro | Productos</div>
       </div>
       <div class="topbar__right">
         <span id="userEmail" class="muted"></span>
@@ -28,7 +26,7 @@
   <main class="wrap">
     <section id="authBox" class="panel">
       <h1>Ingresar</h1>
-      <p class="muted">Solo usuarios autorizados (whitelist).</p>
+      <p class="muted">Solo usuarios autorizados (tabla admin_users).</p>
 
       <div class="grid2">
         <div class="field">
@@ -48,12 +46,13 @@
     <section id="adminBox" class="admin" style="display:none">
       <section class="panel">
         <h2>Nuevo producto</h2>
+        <p class="muted">Primero subis la foto (upload inmediato), despues completas datos y publicas.</p>
 
         <div class="grid2">
           <div class="field">
             <label>Imagen</label>
             <input id="imageInput" type="file" accept="image/*" />
-            <small class="muted">Se sube al seleccionar (upload inmediato).</small>
+            <small class="muted">Se sube automaticamente al seleccionar.</small>
           </div>
 
           <div class="field">
@@ -78,7 +77,7 @@
         <div class="grid2">
           <div class="field">
             <label>Categoria</label>
-            <input id="categoryInput" type="text" placeholder="Ej: Ofertas" />
+            <input id="categoryInput" type="text" placeholder="Ej: Ofertas (para carrusel)" />
           </div>
           <div class="field">
             <label>Activo</label>
