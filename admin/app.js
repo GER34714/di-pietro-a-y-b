@@ -1,271 +1,324 @@
+// =========================
+// CONFIG
+// =========================
 const SUPABASE_URL = "https://tgzcpnhrqyvldvbbbuen.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_5ww2RCVjjnHS8P1T2n9FZw_wzZr4ZAg";
 
-const BUCKET_PRODUCTS = "product-images";
+// IMPORTANT: usa el bucket que YA existe (el del overlay que te funciona)
+const BUCKET = "imagenes y videos di pietro";
 
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+// =========================
+// HELPERS
+// =========================
 const $ = (id) => document.getElementById(id);
 
-function show(el, on) { if (!el) return; el.hidden = !on; }
-function setText(el, t) { if (el) el.textContent = t; }
-
-function cleanStr(s) { return (s || "").toString().trim(); }
-function numVal(s) { const n = Number(s); return Number.isFinite(n) ? n : 0; }
-
-async function getSessionUser() {
-  const { data } = await supabaseClient.auth.getSession();
-  return data?.session?.user || null;
+function safeText(s) {
+  return (s || "").toString().trim();
 }
 
-async function isAuthorizedByEmail(email) {
-  if (!email) return false;
+function moneyARS(n) {
+  const v = Number(n || 0);
+  return v.toLocaleString("es-AR", { style: "currency", currency: "ARS", maximumFractionDigits: 0 });
+}
+
+function slugify(s) {
+  return safeText(s)
+    .toLowerCase()
+    .replace(/á/g,"a").replace(/é/g,"e").replace(/í/g,"i").replace(/ó/g,"o").replace(/ú/g,"u").replace(/ñ/g,"n")
+    .replace(/[^a-z0-9]+/g,"-")
+    .replace(/(^-|-$)/g,"");
+}
+
+// =========================
+// STATE
+// =========================
+let sessionUser = null;
+let isAdmin = false;
+
+let uploaded = {
+  path: null,
+  publicUrl: null
+};
+
+// =========================
+// AUTH
+// =========================
+async function getSession() {
+  const { data } = await supabaseClient.auth.getSession();
+  sessionUser = data?.session?.user || null;
+  return sessionUser;
+}
+
+// WHITELIST POR UID (tu tabla admin_users requiere user_id NOT NULL)
+async function checkAdmin() {
+  if (!sessionUser?.id) return false;
+
   const { data, error } = await supabaseClient
     .from("admin_users")
-    .select("email")
-    .eq("email", email.toLowerCase())
-    .limit(1);
-
-  if (error) return false;
-  return Array.isArray(data) && data.length > 0;
-}
-
-let localPreviewUrl = "";
-let uploadedPublicUrl = "";
-let uploadedPath = "";
-let uploading = false;
-
-function setImgPreview(src) {
-  const img = $("imgPreview");
-  if (!img) return;
-  if (!src) {
-    img.classList.remove("isOn");
-    img.removeAttribute("src");
-    return;
-  }
-  img.src = src;
-  img.classList.add("isOn");
-}
-
-function setImgStatus(msg, on = true) {
-  const s = $("imgStatus");
-  if (!s) return;
-  setText(s, msg);
-  show(s, on);
-}
-
-function setMsg(id, msg, on = true) {
-  const el = $(id);
-  if (!el) return;
-  setText(el, msg);
-  show(el, on);
-}
-
-function togglePublishBtn() {
-  const ok =
-    cleanStr($("p_name").value) &&
-    numVal($("p_price").value) > 0 &&
-    cleanStr($("p_desc").value) &&
-    uploadedPublicUrl &&
-    !uploading;
-
-  $("btnPublish").disabled = !ok;
-}
-
-function resetImageState() {
-  if (localPreviewUrl) {
-    URL.revokeObjectURL(localPreviewUrl);
-    localPreviewUrl = "";
-  }
-  uploadedPublicUrl = "";
-  uploadedPath = "";
-  setImgPreview("");
-  setImgStatus("", false);
-  show($("btnViewRemote"), false);
-  show($("btnClearImage"), false);
-  togglePublishBtn();
-}
-
-async function uploadImage(file) {
-  uploading = true;
-  togglePublishBtn();
-
-  setImgStatus("Subiendo imagen...", true);
-
-  const ext = (file.name.split(".").pop() || "jpg").toLowerCase().replace(/[^a-z0-9]/g, "");
-  const safeExt = ext || "jpg";
-  const fileName = `${Date.now()}_${Math.random().toString(16).slice(2)}.${safeExt}`;
-  const path = `products/${fileName}`;
-
-  const { error } = await supabaseClient
-    .storage
-    .from(BUCKET_PRODUCTS)
-    .upload(path, file, { upsert: true, contentType: file.type || "image/jpeg" });
+    .select("user_id")
+    .eq("user_id", sessionUser.id)
+    .maybeSingle();
 
   if (error) {
-    uploading = false;
-    setImgStatus("Error al subir. Proba de nuevo.", true);
+    console.error(error);
+    return false;
+  }
+  return !!data?.user_id;
+}
+
+function setStatus(el, msg) {
+  el.textContent = safeText(msg);
+}
+
+function showAdminUI(on) {
+  $("authCard").hidden = on;
+  $("adminCard").hidden = !on;
+  $("listCard").hidden = !on;
+}
+
+// =========================
+// UPLOAD (SE SUBE AL TOQUE AL ELEGIR ARCHIVO)
+// =========================
+async function uploadSelectedFile(file) {
+  uploaded = { path: null, publicUrl: null };
+  $("publishBtn").disabled = true;
+
+  if (!file) {
+    setStatus($("productStatus"), "");
+    $("uploadHint").textContent = "Todavía no subiste una imagen.";
     return;
   }
 
-  uploadedPath = path;
+  const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
+  const base = `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+  const path = `products/${base}.${ext}`;
 
-  const { data: pub } = supabaseClient
-    .storage
-    .from(BUCKET_PRODUCTS)
-    .getPublicUrl(path);
+  $("uploadHint").textContent = "Subiendo imagen...";
+  setStatus($("productStatus"), `Subiendo imagen a Supabase Storage... (bucket: ${BUCKET})`);
 
-  uploadedPublicUrl = pub?.publicUrl || "";
+  const { error: upErr } = await supabaseClient.storage
+    .from(BUCKET)
+    .upload(path, file, { upsert: false, cacheControl: "3600" });
 
-  uploading = false;
+  if (upErr) {
+    console.error(upErr);
+    $("uploadHint").textContent = "Error al subir la imagen.";
 
-  setImgStatus("Imagen subida OK", true);
+    // Muestra el error REAL (para que no quede en "proba de nuevo")
+    const details = (() => {
+      try { return JSON.stringify(upErr); } catch { return ""; }
+    })();
 
-  show($("btnClearImage"), true);
-  show($("btnViewRemote"), true);
+    setStatus($("productStatus"), `Error upload: ${upErr.message || upErr} ${details ? "| " + details : ""}`);
 
-  togglePublishBtn();
+    // Nota: si aca dice algo como "new row violates row-level security policy"
+    // entonces falta policy de INSERT en storage.objects para este bucket/carpeta.
+    return;
+  }
+
+  const { data: pub } = supabaseClient.storage.from(BUCKET).getPublicUrl(path);
+  const publicUrl = pub?.publicUrl || null;
+
+  uploaded = { path, publicUrl };
+
+  $("uploadHint").textContent = "Imagen subida OK.";
+  setStatus($("productStatus"), "Imagen subida OK. Ahora completa los datos y publica.");
+  $("publishBtn").disabled = false;
 }
 
-async function handleFileChange(e) {
-  const file = e.target.files && e.target.files[0];
-  if (!file) return;
-
-  resetImageState();
-
-  localPreviewUrl = URL.createObjectURL(file);
-  setImgPreview(localPreviewUrl);
-
-  show($("btnClearImage"), true);
-
-  await uploadImage(file);
-}
-
-async function publishProduct() {
-  const name = cleanStr($("p_name").value);
-  const price = numVal($("p_price").value);
-  const category = cleanStr($("p_category").value);
-  const description = cleanStr($("p_desc").value);
-
-  if (!name || price <= 0 || !description || !uploadedPublicUrl) return;
-
-  $("btnPublish").disabled = true;
-  setMsg("panelMsg", "Publicando...", true);
-
-  const payload = {
-    name,
-    price,
-    category,
-    description,
-    image_url: uploadedPublicUrl,
-    active: true,
-    badges: []
-  };
-
+// =========================
+// CRUD PRODUCTS
+// =========================
+async function createProduct(payload) {
   const { error } = await supabaseClient.from("products").insert(payload);
-
-  if (error) {
-    setMsg("panelMsg", "No se pudo publicar. Revisa permisos o datos.", true);
-    togglePublishBtn();
-    return;
-  }
-
-  setMsg("panelMsg", "Publicado OK.", true);
-
-  $("p_name").value = "";
-  $("p_price").value = "";
-  $("p_category").value = "";
-  $("p_desc").value = "";
-  $("p_img").value = "";
-  resetImageState();
-  togglePublishBtn();
+  if (error) throw error;
 }
 
-async function doLogin() {
-  const email = cleanStr($("email").value).toLowerCase();
-  const password = cleanStr($("pass").value);
+async function fetchAllProductsAdmin() {
+  const { data, error } = await supabaseClient
+    .from("products")
+    .select("id,name,price,category,active,created_at")
+    .order("created_at", { ascending: false });
 
-  if (!email || !password) {
-    setMsg("authMsg", "Completa email y password.", true);
-    return;
+  if (error) throw error;
+  return Array.isArray(data) ? data : [];
+}
+
+async function setActive(id, active) {
+  const { error } = await supabaseClient.from("products").update({ active }).eq("id", id);
+  if (error) throw error;
+}
+
+async function deleteProduct(id) {
+  const { error } = await supabaseClient.from("products").delete().eq("id", id);
+  if (error) throw error;
+}
+
+// =========================
+// UI ACTIONS
+// =========================
+async function renderList() {
+  const el = $("list");
+  el.innerHTML = "";
+  try {
+    const items = await fetchAllProductsAdmin();
+    if (!items.length) {
+      el.innerHTML = `<div class="status">No hay productos cargados todavía.</div>`;
+      return;
+    }
+
+    for (const p of items) {
+      const row = document.createElement("div");
+      row.className = "row";
+      row.innerHTML = `
+        <div>
+          <div class="rowTitle">${safeText(p.name)}</div>
+          <div class="rowMeta">${safeText(p.category)} - ${moneyARS(p.price)} - ${p.active ? "ACTIVO" : "OCULTO"}</div>
+        </div>
+        <div class="rowActions">
+          <button class="btn btn--soft" type="button" data-toggle="${p.id}">${p.active ? "Ocultar" : "Activar"}</button>
+          <button class="btn btn--danger" type="button" data-del="${p.id}">Borrar</button>
+        </div>
+      `;
+
+      row.addEventListener("click", async (e) => {
+        const tBtn = e.target.closest("[data-toggle]");
+        const dBtn = e.target.closest("[data-del]");
+        try {
+          if (tBtn) {
+            const id = tBtn.getAttribute("data-toggle");
+            await setActive(id, !p.active);
+            await renderList();
+          }
+          if (dBtn) {
+            const id = dBtn.getAttribute("data-del");
+            await deleteProduct(id);
+            await renderList();
+          }
+        } catch (err) {
+          console.error(err);
+          setStatus($("productStatus"), `Error: ${err.message || err}`);
+        }
+      });
+
+      el.appendChild(row);
+    }
+  } catch (err) {
+    console.error(err);
+    el.innerHTML = `<div class="status">Error cargando lista: ${safeText(err.message || err)}</div>`;
   }
+}
 
-  setMsg("authMsg", "Ingresando...", true);
+function resetForm() {
+  $("file").value = "";
+  $("name").value = "";
+  $("price").value = "";
+  $("desc").value = "";
+  $("category").value = "Otros";
+  uploaded = { path: null, publicUrl: null };
+  $("publishBtn").disabled = true;
+  $("uploadHint").textContent = "Todavía no subiste una imagen.";
+  setStatus($("productStatus"), "");
+}
 
-  const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
-  if (error || !data?.user) {
-    setMsg("authMsg", "Email o password incorrectos.", true);
-    return;
-  }
-
-  const ok = await isAuthorizedByEmail(data.user.email);
-  if (!ok) {
+// =========================
+// INIT
+// =========================
+async function init() {
+  $("logout").addEventListener("click", async () => {
     await supabaseClient.auth.signOut();
-    setMsg("authMsg", "No autorizado.", true);
-    return;
-  }
+    location.reload();
+  });
+
+  $("refresh").addEventListener("click", async () => {
+    await boot();
+  });
+
+  $("loginForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    setStatus($("authStatus"), "Entrando...");
+
+    const email = safeText($("email").value);
+    const password = safeText($("password").value);
+
+    const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+    if (error) {
+      setStatus($("authStatus"), `Error: ${error.message}`);
+      return;
+    }
+    sessionUser = data?.user || null;
+    await boot();
+  });
+
+  $("file").addEventListener("change", async (e) => {
+    const file = e.target.files && e.target.files[0] ? e.target.files[0] : null;
+    await uploadSelectedFile(file);
+  });
+
+  $("resetBtn").addEventListener("click", resetForm);
+
+  $("productForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    try {
+      setStatus($("productStatus"), "Publicando...");
+
+      if (!uploaded.publicUrl) {
+        setStatus($("productStatus"), "Falta la imagen (subila primero).");
+        return;
+      }
+
+      const name = safeText($("name").value);
+      const price = Number($("price").value || 0);
+      const description = safeText($("desc").value);
+      const category = safeText($("category").value) || "Otros";
+
+      const payload = {
+        name,
+        price,
+        description,
+        category,
+        image_url: uploaded.publicUrl,
+        badges: [],
+        active: true
+      };
+
+      await createProduct(payload);
+
+      setStatus($("productStatus"), "Producto publicado OK. Ya aparece en la web A.");
+      resetForm();
+      await renderList();
+    } catch (err) {
+      console.error(err);
+      setStatus($("productStatus"), `Error: ${err.message || err}`);
+    }
+  });
 
   await boot();
 }
 
-async function doLogout() {
-  await supabaseClient.auth.signOut();
-  location.reload();
-}
-
 async function boot() {
-  const user = await getSessionUser();
-  const who = $("whoami");
-  const btnLogout = $("btnLogout");
+  await getSession();
 
-  if (!user) {
-    setText(who, "No autenticado");
-    show(btnLogout, false);
-    show($("authCard"), true);
-    show($("panelCard"), false);
+  if (!sessionUser) {
+    showAdminUI(false);
+    setStatus($("authStatus"), "Entrá con tu usuario admin de Supabase Auth.");
     return;
   }
 
-  const ok = await isAuthorizedByEmail(user.email);
-  if (!ok) {
-    await supabaseClient.auth.signOut();
-    setText(who, "No autorizado");
-    show(btnLogout, false);
-    show($("authCard"), true);
-    show($("panelCard"), false);
-    setMsg("authMsg", "No autorizado.", true);
+  isAdmin = await checkAdmin();
+
+  if (!isAdmin) {
+    showAdminUI(false);
+    setStatus($("authStatus"), "No autorizado. Falta tu UID en la tabla admin_users.");
     return;
   }
 
-  setText(who, user.email);
-  show(btnLogout, true);
-  show($("authCard"), false);
-  show($("panelCard"), true);
-
-  togglePublishBtn();
+  showAdminUI(true);
+  setStatus($("authStatus"), "");
+  setStatus($("productStatus"), `Listo. Subí una imagen (se sube al toque) y publicá. (bucket: ${BUCKET})`);
+  await renderList();
 }
 
-function wire() {
-  $("btnLogin").addEventListener("click", doLogin);
-  $("btnLogout").addEventListener("click", doLogout);
-
-  $("p_img").addEventListener("change", handleFileChange);
-
-  $("btnClearImage").addEventListener("click", () => {
-    $("p_img").value = "";
-    resetImageState();
-  });
-
-  $("btnViewRemote").addEventListener("click", () => {
-    if (uploadedPublicUrl) window.open(uploadedPublicUrl, "_blank", "noopener");
-  });
-
-  ["p_name","p_price","p_category","p_desc"].forEach(id => {
-    $(id).addEventListener("input", togglePublishBtn);
-  });
-
-  $("btnPublish").addEventListener("click", publishProduct);
-}
-
-wire();
-boot();
+init();
