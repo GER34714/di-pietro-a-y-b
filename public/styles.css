@@ -1,3 +1,4 @@
+/* public/styles.css */
 :root{
   --bg:#070b12;
   --panel:#0b1220cc;
@@ -13,7 +14,6 @@
   --radius2:26px;
   --max:1180px;
 }
-
 *{box-sizing:border-box}
 html,body{height:100%}
 body{
