@@ -7,7 +7,8 @@ const BRAND_NAME = "Di Pietro Cocinas industriales e insumos comerciales";
 const BRAND_SUBTITLE = "Escobar | 9 a 13 / 15 a 18";
 const OFFERS_CATEGORY = "ofertas";
 
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+// IMPORTANT: avoid clashing with global "supabase" from CDN by naming the client "sb"
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
 
 const brandTitle = document.getElementById("brandTitle");
 const brandSubtitle = document.getElementById("brandSubtitle");
@@ -429,7 +430,7 @@ zoomViewport.addEventListener("pointerup", ()=>{ isDragging = false; });
 
 async function loadProducts(){
   showState("Cargando productos...");
-  const { data, error } = await supabase
+  const { data, error } = await sb
     .from("products")
     .select("id,name,description,price,category,image_url,active,created_at")
     .eq("active", true)
