@@ -1,269 +1,383 @@
-<!-- /public/index.html -->
-<!doctype html>
-<html lang="es-AR">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Di Pietro | Catalogo premium</title>
-  <meta name="description" content="Catalogo premium. Armá tu pedido y finalizá por WhatsApp." />
-  <meta property="og:title" content="Di Pietro Cocinas industriales e insumos comerciales" />
-  <meta property="og:description" content="Cocinas industriales con horno pizzero. Garantia 6 meses. Se abona cuando llega a tu domicilio." />
-  <meta property="og:image" content="https://iili.io/q33l7Uu.png" />
-  <meta property="og:type" content="website" />
-  <link rel="stylesheet" href="./styles.css" />
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-</head>
-<body>
-  <header class="topbar">
-    <div class="wrap topbar__inner">
-      <div class="brand">
-        <div class="brand__title" id="brandTitle">Di Pietro Cocinas industriales e insumos comerciales</div>
-        <div class="brand__subtitle" id="brandSubtitle">Escobar | Pedido por WhatsApp</div>
-      </div>
+/* /public/styles.css */
+:root{
+  --bg: #fbf7f0;
+  --panel: rgba(255,255,255,.78);
+  --text: #1f2937;
+  --muted: #6b7280;
+  --line: rgba(31,41,55,.10);
+  --shadow: 0 18px 60px rgba(31,41,55,.12);
+  --radius: 18px;
+  --accent: #16a34a;
+  --accent2: #0ea5e9;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  color: var(--text);
+  background:
+    radial-gradient(900px 600px at 15% -10%, rgba(255, 225, 207, .70), transparent 55%),
+    radial-gradient(900px 600px at 90% 0%, rgba(223, 247, 238, .70), transparent 55%),
+    radial-gradient(900px 600px at 70% 95%, rgba(236, 233, 255, .70), transparent 55%),
+    var(--bg);
+}
+.wrap{width:min(1120px, 92vw); margin:0 auto}
+.topbar{
+  position:sticky; top:0; z-index:50;
+  backdrop-filter: blur(10px);
+  background: rgba(251,247,240,.75);
+  border-bottom: 1px solid var(--line);
+}
+.topbar__inner{display:flex; align-items:center; justify-content:space-between; padding:14px 0; gap:12px}
+.brand__title{font-weight:1000}
+.brand__subtitle{color:var(--muted); font-size:13px; margin-top:2px}
+.nav{display:flex; align-items:center; gap:12px}
+.nav__link{
+  text-decoration:none; color: var(--text);
+  font-weight:900; font-size:14px;
+  padding:10px 10px; border-radius:12px;
+}
+.nav__link:hover{background: rgba(31,41,55,.05)}
+.nav__cart{
+  border:1px solid var(--line);
+  background: rgba(255,255,255,.72);
+  color: var(--text);
+  padding:10px 12px;
+  border-radius: 14px;
+  cursor:pointer;
+  font-weight:1000;
+  box-shadow: var(--shadow);
+}
+.badge{
+  display:inline-flex; min-width:22px; height:22px;
+  align-items:center; justify-content:center;
+  border-radius:999px; padding:0 7px; margin-left:8px;
+  border:1px solid var(--line); background: rgba(31,41,55,.06);
+  font-size:12px;
+}
+.burger{
+  display:none; width:44px; height:44px;
+  border-radius:14px; border:1px solid var(--line);
+  background: rgba(255,255,255,.72);
+  box-shadow: var(--shadow);
+  cursor:pointer; padding:10px;
+}
+.burger span{display:block; height:2px; background: rgba(31,41,55,.80); border-radius:99px; margin:6px 0}
+.mobileMenu{display:none; border-top:1px solid var(--line); background: rgba(255,255,255,.80)}
+.mobileMenu.isOpen{display:block}
+.mobileMenu__link{
+  display:block; padding:14px 4vw;
+  text-decoration:none; color: var(--text);
+  font-weight:1000; border-bottom:1px solid rgba(31,41,55,.06);
+}
+.mobileMenu__btn{width:100%; text-align:left; border:0; background:transparent; cursor:pointer}
 
-      <nav class="nav" id="nav">
-        <a href="#catalogo" class="nav__link">Productos</a>
-        <a href="#ofertas" class="nav__link">Ofertas</a>
-        <a href="#como" class="nav__link">Como comprar</a>
-        <button id="openCartBtn" class="nav__cart" type="button">
-          Carrito <span id="cartCount" class="badge">0</span>
-        </button>
-      </nav>
+.hero{padding:18px 0 10px}
+.heroCard{
+  display:grid; grid-template-columns: 1.15fr .85fr;
+  gap:14px;
+  border:1px solid var(--line);
+  border-radius: 22px;
+  background: linear-gradient(135deg, rgba(255,243,227,.92), rgba(223,247,238,.60));
+  box-shadow: var(--shadow);
+  overflow:hidden;
+}
+.heroCard__text{padding:18px}
+.pill{
+  display:inline-flex; align-items:center; gap:8px;
+  padding:8px 12px; border-radius:999px;
+  border:1px solid rgba(31,41,55,.10);
+  background: rgba(255,255,255,.66);
+  font-weight:1000; font-size:12px;
+}
+.heroCard__text h1{margin:10px 0 8px; font-size:28px; line-height:1.05}
+.heroCard__text p{margin:0; color:var(--muted); line-height:1.45; font-size:14px}
+.heroCard__cta{display:flex; gap:10px; margin-top:14px; flex-wrap:wrap}
+.heroBadges{display:flex; gap:10px; flex-wrap:wrap; margin-top:12px}
+.mini{
+  font-size:12px; font-weight:900;
+  padding:8px 10px; border-radius:14px;
+  border:1px solid rgba(31,41,55,.08);
+  background: rgba(255,255,255,.60);
+}
+.heroCard__media{padding:12px 12px 12px 0; display:flex; align-items:stretch}
+.heroCard__media img{
+  width:100%; height:100%;
+  object-fit: cover;
+  border-radius: 18px;
+  border: 1px solid rgba(31,41,55,.08);
+  background: rgba(255,255,255,.65);
+}
+.section{padding: 12px 0 42px}
+.section--soft{padding-top: 8px}
+.section__head{display:flex; align-items:flex-end; justify-content:space-between; gap:12px; margin:10px 0 12px}
+.section__head h2{margin:0; font-size:20px}
+.muted{color:var(--muted); font-size:13px; margin:0}
+.toolbar{display:grid; grid-template-columns: 240px 1fr 200px; gap:12px; margin-bottom:12px}
+.field label{display:block; font-size:12px; color:var(--muted); margin-bottom:6px}
+.field input, .field select{
+  width:100%; padding:11px 12px;
+  border-radius:14px; border:1px solid var(--line);
+  background: rgba(255,255,255,.80);
+  color: var(--text);
+  outline:none;
+  box-shadow: 0 10px 30px rgba(31,41,55,.06);
+}
+.state{
+  display:none; padding:14px;
+  border-radius: var(--radius);
+  border:1px solid var(--line);
+  background: rgba(255,255,255,.78);
+  color: var(--muted);
+  box-shadow: var(--shadow);
+  margin:12px 0;
+}
+.offers{
+  margin:16px 0 14px;
+  padding:12px;
+  border-radius:20px;
+  border:1px solid var(--line);
+  background: rgba(255,255,255,.78);
+  box-shadow: var(--shadow);
+}
+.offers__head{display:grid; grid-template-columns: 1fr auto; gap:10px; align-items:center; margin-bottom:10px}
+.offers__head h3{margin:0; font-size:16px}
+.offers__controls{display:flex; gap:8px}
+.iconBtn{
+  width:40px; height:40px;
+  border-radius: 14px;
+  border:1px solid var(--line);
+  background: rgba(255,255,255,.85);
+  cursor:pointer;
+  box-shadow: 0 10px 30px rgba(31,41,55,.08);
+}
+.offers__track{
+  display:flex; gap:12px;
+  overflow:auto;
+  scroll-snap-type: x mandatory;
+  padding-bottom:6px;
+}
+.offerCard{
+  min-width:250px; max-width:250px;
+  scroll-snap-align: start;
+  border-radius: 18px;
+  border:1px solid rgba(31,41,55,.10);
+  background: linear-gradient(135deg, rgba(236,233,255,.75), rgba(255,225,207,.55));
+  overflow:hidden;
+  box-shadow: 0 14px 40px rgba(31,41,55,.10);
+  cursor:pointer;
+}
+.offerCard img{width:100%; aspect-ratio: 4/3; object-fit: cover; display:block}
+.offerCard__body{padding:10px}
+.offerCard__name{font-weight:1000; font-size:13px; margin:0 0 4px; line-height:1.2}
+.offerCard__price{font-weight:1100; font-size:14px}
 
-      <button id="burgerBtn" class="burger" type="button" aria-label="Menu" aria-expanded="false">
-        <span></span><span></span><span></span>
-      </button>
-    </div>
+.grid{display:grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap:12px}
+.card{
+  border:1px solid rgba(31,41,55,.10);
+  border-radius:18px;
+  background: rgba(255,255,255,.82);
+  box-shadow: var(--shadow);
+  overflow:hidden;
+  cursor:pointer;
+  transition: transform .12s ease;
+}
+.card:active{transform: scale(.99)}
+.card__img{width:100%; aspect-ratio: 4/3; object-fit: cover; display:block}
+.card__body{padding:10px 10px 12px}
+.card__row{display:flex; align-items:flex-start; justify-content:space-between; gap:10px}
+.card__name{margin:0; font-size:14px; line-height:1.2; font-weight:1100}
+.card__price{font-weight:1100; white-space:nowrap}
+.card__desc{
+  margin:6px 0 0;
+  color: var(--muted);
+  font-size:12px;
+  line-height:1.3;
+  display:-webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow:hidden;
+}
+.btn{
+  border:1px solid var(--line);
+  background: rgba(255,255,255,.82);
+  color: var(--text);
+  padding: 10px 12px;
+  border-radius: 14px;
+  cursor:pointer;
+  font-weight:1100;
+  box-shadow: 0 10px 30px rgba(31,41,55,.08);
+}
+.btn--primary{
+  background: linear-gradient(135deg, rgba(22,163,74,.95), rgba(14,165,233,.55));
+  border-color: rgba(22,163,74,.20);
+  color: #0b1a10;
+}
+.btn--ghost{background: rgba(255,255,255,.70)}
+.moreWrap{display:flex; justify-content:center; padding: 16px 0 0}
 
-    <div class="mobileMenu" id="mobileMenu" aria-hidden="true">
-      <a href="#catalogo" class="mobileMenu__link" data-close>Productos</a>
-      <a href="#ofertas" class="mobileMenu__link" data-close>Ofertas</a>
-      <a href="#como" class="mobileMenu__link" data-close>Como comprar</a>
-      <button class="mobileMenu__link mobileMenu__btn" id="openCartBtnMobile" type="button" data-close>
-        Carrito <span id="cartCountMobile" class="badge">0</span>
-      </button>
-    </div>
-  </header>
+.steps{display:grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap:12px}
+.step{
+  border:1px solid rgba(31,41,55,.10);
+  border-radius: 18px;
+  background: rgba(255,255,255,.78);
+  box-shadow: var(--shadow);
+  padding: 12px;
+}
+.step__n{
+  width:36px; height:36px;
+  display:flex; align-items:center; justify-content:center;
+  border-radius: 14px;
+  background: rgba(31,41,55,.06);
+  border:1px solid rgba(31,41,55,.10);
+  font-weight:1100;
+}
+.step__t{margin-top:10px; font-weight:1100}
+.step__d{margin-top:6px; color:var(--muted); font-size:13px; line-height:1.4}
+.ctaBox{
+  margin-top:14px;
+  border:1px solid rgba(31,41,55,.10);
+  border-radius: 20px;
+  background: linear-gradient(135deg, rgba(255,243,227,.90), rgba(236,233,255,.60));
+  box-shadow: var(--shadow);
+  padding: 14px;
+  display:flex; align-items:center; justify-content:space-between;
+  gap:12px;
+}
+.ctaBox__title{font-weight:1100}
+.ctaBox__desc{color:var(--muted); font-size:13px; margin-top:4px}
 
-  <main>
-    <section class="hero">
-      <div class="wrap hero__inner">
-        <div class="heroCard">
-          <div class="heroCard__text">
-            <span class="pill">Cita previa | Atencion 9 a 13 / 15 a 18</span>
-            <h1 id="heroTitle">Di Pietro Cocinas industriales e insumos comerciales</h1>
-            <p id="heroText">Cocinas industriales con horno pizzero. Garantia de 6 meses. Se abona cuando llega a tu domicilio.</p>
+.drawer{position:fixed; inset:0; display:none; z-index:80}
+.drawer.isOpen{display:block}
+.drawer__backdrop{position:absolute; inset:0; border:0; background: rgba(17,24,39,.45); cursor:pointer}
+.drawer__panel{
+  position:absolute; top:0; right:0; height:100%;
+  width: min(420px, 92vw);
+  background: rgba(255,255,255,.90);
+  border-left: 1px solid rgba(31,41,55,.10);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 18px 60px rgba(31,41,55,.22);
+  display:flex; flex-direction:column;
+}
+.drawer__header{display:flex; align-items:center; justify-content:space-between; padding:14px; border-bottom:1px solid rgba(31,41,55,.08)}
+.drawer__title{font-weight:1100}
+.cartItems{padding:10px 14px; overflow:auto; flex:1}
+.cartItem{display:grid; grid-template-columns: 1fr auto; gap:8px 10px; padding:10px 0; border-bottom:1px solid rgba(31,41,55,.08)}
+.cartItem__name{font-weight:1100}
+.cartItem__muted{color:var(--muted); font-size:12px}
+.qtyRow{display:flex; align-items:center; justify-content:flex-end; gap:8px}
+.qtyBtn{width:36px; height:36px; border-radius:14px; border:1px solid rgba(31,41,55,.10); background: rgba(255,255,255,.85); cursor:pointer; font-weight:1100}
+.qtyVal{min-width:22px; text-align:center; font-weight:1100}
+.drawer__footer{border-top:1px solid rgba(31,41,55,.08); padding:12px 14px 14px; display:flex; flex-direction:column; gap:10px}
+.totalRow{display:flex; align-items:center; justify-content:space-between}
+.hint{color:var(--muted); font-size:12px; line-height:1.35}
 
-            <div class="heroBadges">
-              <div class="mini">Escobar</div>
-              <div class="mini">Transferencia o efectivo</div>
-              <div class="mini">Envio y retiro</div>
-            </div>
+.modal{position:fixed; inset:0; display:none; z-index:90}
+.modal.isOpen{display:block}
+.modal__backdrop{position:absolute; inset:0; border:0; background: rgba(17,24,39,.55); cursor:pointer}
+.modal__panel{
+  position:relative;
+  width: min(980px, 92vw);
+  margin: 6vh auto;
+  border-radius: 22px;
+  border:1px solid rgba(255,255,255,.25);
+  background: rgba(255,255,255,.94);
+  box-shadow: 0 18px 60px rgba(31,41,55,.30);
+  overflow:hidden;
+}
+.modal__header{display:flex; align-items:center; justify-content:space-between; padding:12px 14px; border-bottom:1px solid rgba(31,41,55,.08)}
+.modal__title{font-weight:1100}
+.modal__content{display:grid; grid-template-columns: 1.1fr .9fr}
+.zoomBox{padding:14px}
+.zoomBox__viewport{
+  border-radius:18px; border:1px solid rgba(31,41,55,.10);
+  background: rgba(255,255,255,.78);
+  overflow:hidden;
+  aspect-ratio: 4/3;
+  position:relative;
+  touch-action: none;
+}
+.zoomBox__viewport img{
+  width:100%; height:100%;
+  object-fit: contain;
+  display:block;
+  transform-origin: 0 0;
+  user-select:none;
+  -webkit-user-drag:none;
+}
+.zoomBox__controls{display:flex; gap:10px; justify-content:center; margin-top:10px}
+.modal__info{
+  padding:14px 14px 16px;
+  border-left:1px solid rgba(31,41,55,.08);
+  background: linear-gradient(180deg, rgba(255,255,255,.86), rgba(255,255,255,.70));
+}
+.modal__price{font-weight:1200; font-size:20px; margin-bottom:8px}
+.modal__desc{color:var(--muted); font-size:13px; line-height:1.45; white-space:pre-wrap}
+.modal__actions{display:flex; gap:10px; margin-top:14px; flex-wrap:wrap}
 
-            <div class="heroCard__cta">
-              <a href="#catalogo" class="btn btn--primary">Ver productos</a>
-              <button id="openCartBtnHero" class="btn btn--ghost" type="button">Ver carrito</button>
-            </div>
-          </div>
+.footer{border-top:1px solid rgba(31,41,55,.10); background: rgba(255,255,255,.45)}
+.footer__inner{padding:18px 0; color: var(--muted)}
 
-          <div class="heroCard__media">
-            <img src="https://iili.io/q33l7Uu.png" alt="Hero" loading="eager" />
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="wrap section section--soft">
-      <div class="section__head">
-        <h2>Por que comprar aca</h2>
-        <p class="muted">Simple, claro y sin vueltas.</p>
-      </div>
-
-      <div class="steps">
-        <div class="step">
-          <div class="step__n">1</div>
-          <div class="step__t">Garantia 6 meses</div>
-          <div class="step__d">Compra con respaldo. Equipos pensados para laburo real.</div>
-        </div>
-        <div class="step">
-          <div class="step__n">2</div>
-          <div class="step__t">Pago en entrega</div>
-          <div class="step__d">Transferencia o efectivo. Se abona cuando llega a tu domicilio.</div>
-        </div>
-        <div class="step">
-          <div class="step__n">3</div>
-          <div class="step__t">Visita con cita previa</div>
-          <div class="step__d">Coordinamos por WhatsApp en el horario de atencion.</div>
-        </div>
-      </div>
-    </section>
-
-    <section id="catalogo" class="wrap section">
-      <div class="section__head">
-        <h2>Productos</h2>
-        <p class="muted">Mostrando productos activos. Elegi y arma tu pedido.</p>
-      </div>
-
-      <div class="toolbar">
-        <div class="field">
-          <label for="categorySelect">Categoria</label>
-          <select id="categorySelect">
-            <option value="__all__">Todas</option>
-          </select>
-        </div>
-
-        <div class="field">
-          <label for="searchInput">Buscar</label>
-          <input id="searchInput" type="search" placeholder="Nombre o descripcion..." />
-        </div>
-
-        <div class="field field--small">
-          <label for="sortSelect">Orden</label>
-          <select id="sortSelect">
-            <option value="new">Mas nuevos</option>
-            <option value="price_asc">Menor precio</option>
-            <option value="price_desc">Mayor precio</option>
-          </select>
-        </div>
-      </div>
-
-      <div id="stateBox" class="state" aria-live="polite"></div>
-
-      <section id="ofertas" class="offers" aria-label="Ofertas" style="display:none">
-        <div class="offers__head">
-          <h3>Ofertas</h3>
-          <p class="muted">Toca para ver detalle y agregar al carrito.</p>
-          <div class="offers__controls">
-            <button class="iconBtn" id="offersPrev" type="button" aria-label="Anterior">‹</button>
-            <button class="iconBtn" id="offersNext" type="button" aria-label="Siguiente">›</button>
-          </div>
-        </div>
-        <div class="offers__track" id="offersTrack"></div>
-      </section>
-
-      <div id="grid" class="grid" aria-live="polite"></div>
-
-      <div class="moreWrap" id="moreWrap" style="display:none">
-        <button id="moreBtn" class="btn btn--ghost" type="button">Ver mas</button>
-      </div>
-    </section>
-
-    <section id="como" class="wrap section section--soft">
-      <div class="section__head">
-        <h2>Como comprar</h2>
-        <p class="muted">En 30 segundos.</p>
-      </div>
-
-      <div class="steps">
-        <div class="step">
-          <div class="step__n">1</div>
-          <div class="step__t">Elegis productos</div>
-          <div class="step__d">Tocas una card para ver detalle y sumas al carrito.</div>
-        </div>
-        <div class="step">
-          <div class="step__n">2</div>
-          <div class="step__t">Revisas el total</div>
-          <div class="step__d">El carrito calcula todo y te deja ajustar cantidades.</div>
-        </div>
-        <div class="step">
-          <div class="step__n">3</div>
-          <div class="step__t">Finalizas por WhatsApp</div>
-          <div class="step__d">Se abre WhatsApp con el pedido armado, listo para enviar.</div>
-        </div>
-      </div>
-
-      <div class="ctaBox">
-        <div class="ctaBox__text">
-          <div class="ctaBox__title">Listo para pedir?</div>
-          <div class="ctaBox__desc">Armá el carrito y finalizá por WhatsApp.</div>
-        </div>
-        <button class="btn btn--primary" id="ctaGoCart" type="button">Ir al carrito</button>
-      </div>
-    </section>
-  </main>
-
-  <aside id="cartDrawer" class="drawer" aria-hidden="true">
-    <button id="drawerBackdrop" class="drawer__backdrop" type="button" aria-label="Cerrar"></button>
-
-    <div class="drawer__panel">
-      <div class="drawer__header">
-        <div class="drawer__title">Tu carrito</div>
-        <button id="closeCartBtn" class="iconBtn" type="button" aria-label="Cerrar">X</button>
-      </div>
-
-      <div id="cartItems" class="cartItems"></div>
-
-      <div class="drawer__footer">
-        <div class="totalRow">
-          <span>Total</span>
-          <strong id="cartTotal">$0</strong>
-        </div>
-
-        <button id="checkoutBtn" class="btn btn--primary" type="button">Finalizar pedido por WhatsApp</button>
-        <div class="hint">Pago: transferencia o efectivo. Se abona al recibir.</div>
-      </div>
-    </div>
-  </aside>
-
-  <div class="stickyBar" id="stickyBar" aria-hidden="false">
-    <button class="stickyBar__cart" id="stickyCartBtn" type="button">
-      <span>Carrito</span>
-      <span class="stickyBar__right">
-        <span id="stickyItems">0</span>
-        <span class="dot">•</span>
-        <strong id="stickyTotal">$0</strong>
-      </span>
-    </button>
-    <button class="stickyBar__cta" id="stickyCheckoutBtn" type="button">Finalizar</button>
-  </div>
-
-  <a class="waFloat" id="waFloat" href="#" target="_blank" rel="noopener" aria-label="WhatsApp">
-    <svg viewBox="0 0 32 32" width="22" height="22" aria-hidden="true">
-      <path fill="currentColor" d="M19.11 17.2c-.26-.13-1.55-.77-1.79-.86-.24-.09-.41-.13-.59.13-.17.26-.68.86-.84 1.04-.15.17-.3.2-.56.07-.26-.13-1.1-.41-2.09-1.3-.77-.69-1.29-1.54-1.44-1.8-.15-.26-.02-.4.11-.53.12-.12.26-.3.39-.45.13-.15.17-.26.26-.43.09-.17.04-.33-.02-.45-.06-.13-.59-1.42-.81-1.95-.21-.5-.43-.43-.59-.44l-.5-.01c-.17 0-.45.06-.69.33-.24.26-.9.88-.9 2.14 0 1.26.92 2.48 1.05 2.65.13.17 1.81 2.76 4.38 3.87.61.26 1.09.42 1.46.54.61.19 1.16.16 1.6.1.49-.07 1.55-.63 1.77-1.24.22-.61.22-1.13.15-1.24-.06-.11-.24-.17-.5-.3zM16 3.2C9.37 3.2 4 8.57 4 15.2c0 2.12.55 4.11 1.52 5.84L4 28.8l7.95-1.49c1.64.89 3.52 1.39 5.52 1.39 6.63 0 12-5.37 12-12S22.63 3.2 16 3.2zm0 22.13c-1.82 0-3.51-.5-4.96-1.37l-.36-.21-4.72.88.9-4.59-.23-.38A9.94 9.94 0 0 1 6.2 15.2c0-5.4 4.4-9.8 9.8-9.8 5.4 0 9.8 4.4 9.8 9.8 0 5.4-4.4 9.8-9.8 9.8z"/>
-    </svg>
-  </a>
-
-  <div id="modal" class="modal" aria-hidden="true">
-    <button id="modalBackdrop" class="modal__backdrop" type="button" aria-label="Cerrar"></button>
-    <div class="modal__panel" role="dialog" aria-modal="true">
-      <div class="modal__header">
-        <div class="modal__title" id="modalTitle">Producto</div>
-        <button id="modalClose" class="iconBtn" type="button" aria-label="Cerrar">X</button>
-      </div>
-
-      <div class="modal__content">
-        <div class="zoomBox">
-          <div class="zoomBox__viewport" id="zoomViewport">
-            <img id="modalImg" alt="" />
-          </div>
-          <div class="zoomBox__controls">
-            <button class="btn btn--ghost" id="zoomOut" type="button">-</button>
-            <button class="btn btn--ghost" id="zoomReset" type="button">Reset</button>
-            <button class="btn btn--ghost" id="zoomIn" type="button">+</button>
-          </div>
-        </div>
-
-        <div class="modal__info">
-          <div class="modal__price" id="modalPrice">$0</div>
-          <div class="modal__desc" id="modalDesc"></div>
-
-          <div class="modal__actions">
-            <button class="btn btn--primary" id="modalAdd" type="button">Agregar al carrito</button>
-            <button class="btn btn--ghost" id="modalGoCart" type="button">Ver carrito</button>
-          </div>
-
-          <div class="muted" style="margin-top:10px">Pago: transferencia o efectivo. Se abona al recibir. Visita con cita previa.</div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <footer class="footer">
-    <div class="wrap footer__inner">
-      <small>Di Pietro | Escobar | 9 a 13 / 15 a 18</small>
-    </div>
-  </footer>
-
-  <script src="./app.js"></script>
-</body>
-</html>
+.stickyBar{
+  position: fixed;
+  left: 10px; right: 10px; bottom: 10px;
+  z-index: 60;
+  display:none;
+  gap:10px;
+}
+.stickyBar__cart{
+  flex:1;
+  border-radius:18px;
+  border:1px solid rgba(31,41,55,.10);
+  background: rgba(255,255,255,.92);
+  box-shadow: 0 18px 60px rgba(31,41,55,.18);
+  padding: 12px;
+  display:flex; align-items:center; justify-content:space-between;
+  cursor:pointer; font-weight:1100;
+}
+.stickyBar__right{display:flex; align-items:center; gap:8px}
+.dot{opacity:.55}
+.stickyBar__cta{
+  width:120px;
+  border-radius:18px;
+  border:1px solid rgba(22,163,74,.22);
+  background: linear-gradient(135deg, rgba(22,163,74,.95), rgba(14,165,233,.55));
+  box-shadow: 0 18px 60px rgba(31,41,55,.18);
+  cursor:pointer;
+  font-weight:1200;
+  color:#0b1a10;
+}
+.waFloat{
+  position: fixed;
+  right: 14px;
+  bottom: 90px;
+  width: 52px;
+  height: 52px;
+  border-radius: 999px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background: rgba(22,163,74,.95);
+  color: #04120a;
+  box-shadow: 0 18px 60px rgba(31,41,55,.22);
+  border: 1px solid rgba(255,255,255,.55);
+  text-decoration:none;
+}
+@media (max-width: 980px){
+  .heroCard{grid-template-columns: 1fr}
+  .heroCard__media{padding: 0 18px 18px}
+  .toolbar{grid-template-columns: 1fr}
+  .modal__content{grid-template-columns: 1fr}
+  .modal__info{border-left:0; border-top:1px solid rgba(31,41,55,.08)}
+  .steps{grid-template-columns: 1fr}
+}
+@media (max-width: 760px){
+  .nav{display:none}
+  .burger{display:inline-block}
+  .grid{grid-template-columns: repeat(2, minmax(0, 1fr))}
+  .card__name{font-size:13px}
+  .card__desc{-webkit-line-clamp: 1}
+  .offerCard{min-width: 220px; max-width: 220px}
+  .stickyBar{display:flex}
+}
