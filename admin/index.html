@@ -1,10 +1,13 @@
+admin/index.html
+
 <!doctype html>
+
 <html lang="es-AR">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <meta name="theme-color" content="#0b0f17" />
-  <title>Di Pietro Comercial | Admin</title>
+  <title>Di Pietro | Admin</title>
   <meta name="description" content="Panel admin para cargar productos." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -29,86 +32,99 @@
         </div>
       </div>
       <div class="actions">
+        <button class="btn btn--soft" id="btnRefresh" type="button">Refrescar</button>
         <button class="btn btn--soft" id="btnLogout" type="button" hidden>Cerrar sesion</button>
       </div>
     </div>
   </header>
 
-  <main class="wrap">
+  <main class="wrap main">
     <section class="card" id="authCard">
       <h1 class="title">Ingresar</h1>
-      <p class="muted">Solo usuarios autorizados.</p>
+      <p class="muted">Solo usuarios autorizados (tabla admin_users).</p>
 
-      <div class="grid2">
-        <div class="field">
-          <label class="label" for="email">Email</label>
-          <input class="input" id="email" type="email" autocomplete="email" placeholder="tu@email.com" />
-        </div>
-        <div class="field">
-          <label class="label" for="pass">Password</label>
-          <input class="input" id="pass" type="password" autocomplete="current-password" placeholder="••••••••" />
-        </div>
-      </div>
+```
+  <div class="grid2">
+    <div class="field">
+      <label class="label" for="email">Email</label>
+      <input class="input" id="email" type="email" autocomplete="email" placeholder="tu@email.com" />
+    </div>
+    <div class="field">
+      <label class="label" for="pass">Password</label>
+      <input class="input" id="pass" type="password" autocomplete="current-password" placeholder="••••••••" />
+    </div>
+  </div>
 
+  <div class="row">
+    <button class="btn btn--primary" id="btnLogin" type="button">Ingresar</button>
+  </div>
+
+  <div class="note" id="authMsg" hidden></div>
+</section>
+
+<section class="card" id="panelCard" hidden>
+  <h2 class="title">Nuevo producto</h2>
+  <p class="muted">Subi imagen, completa campos y publica. El public lee solo active=true.</p>
+
+  <div class="grid3">
+    <div class="field">
+      <label class="label" for="p_name">Nombre</label>
+      <input class="input" id="p_name" type="text" placeholder="Ej: Cocina industrial 4 hornallas" />
+    </div>
+    <div class="field">
+      <label class="label" for="p_price">Precio</label>
+      <input class="input" id="p_price" type="number" inputmode="numeric" placeholder="Ej: 150000" />
+    </div>
+    <div class="field">
+      <label class="label" for="p_category">Categoria</label>
+      <input class="input" id="p_category" type="text" placeholder="Ej: Cocinas" value="Otros" />
+    </div>
+  </div>
+
+  <div class="field">
+    <label class="label" for="p_desc">Descripcion</label>
+    <textarea class="input" id="p_desc" rows="4" placeholder="Descripcion corta y clara..."></textarea>
+  </div>
+
+  <div class="uploader">
+    <div class="uploader__left">
+      <label class="label" for="p_img">Imagen</label>
+      <input class="input" id="p_img" type="file" accept="image/*" />
+      <div class="hint" id="imgHint">Selecciona una imagen. Primero preview local, luego upload a Storage.</div>
+      <div class="status" id="imgStatus" hidden></div>
       <div class="row">
-        <button class="btn btn--primary" id="btnLogin" type="button">Ingresar</button>
+        <button class="btn btn--soft" id="btnViewRemote" type="button" hidden>Ver imagen subida</button>
+        <button class="btn btn--soft" id="btnClearImage" type="button" hidden>Quitar imagen</button>
       </div>
+    </div>
 
-      <div class="note" id="authMsg" hidden></div>
-    </section>
-
-    <section class="card" id="panelCard" hidden>
-      <h2 class="title">Nuevo producto</h2>
-      <p class="muted">Completa los campos y publica.</p>
-
-      <div class="grid3">
-        <div class="field">
-          <label class="label" for="p_name">Nombre</label>
-          <input class="input" id="p_name" type="text" placeholder="Ej: Cocina industrial 4 hornallas" />
-        </div>
-        <div class="field">
-          <label class="label" for="p_price">Precio</label>
-          <input class="input" id="p_price" type="number" inputmode="numeric" placeholder="Ej: 150000" />
-        </div>
-        <div class="field">
-          <label class="label" for="p_category">Categoria</label>
-          <input class="input" id="p_category" type="text" placeholder="Ej: Cocinas" />
-        </div>
+    <div class="uploader__right">
+      <div class="preview">
+        <img id="imgPreview" alt="Vista previa" />
       </div>
+    </div>
+  </div>
 
-      <div class="field">
-        <label class="label" for="p_desc">Descripcion</label>
-        <textarea class="input" id="p_desc" rows="4" placeholder="Descripcion corta y clara..."></textarea>
-      </div>
+  <div class="row">
+    <button class="btn btn--primary" id="btnPublish" type="button" disabled>Publicar</button>
+  </div>
 
-      <div class="uploader">
-        <div class="uploader__left">
-          <label class="label" for="p_img">Imagen</label>
-          <input class="input" id="p_img" type="file" accept="image/*" />
-          <div class="hint" id="imgHint">Selecciona una imagen. Se ve una vista previa local y luego queda subida.</div>
-          <div class="status" id="imgStatus" hidden></div>
-          <div class="row">
-            <button class="btn btn--soft" id="btnViewRemote" type="button" hidden>Ver imagen subida</button>
-            <button class="btn btn--soft" id="btnClearImage" type="button" hidden>Quitar imagen</button>
-          </div>
-        </div>
+  <div class="note" id="panelMsg" hidden></div>
+</section>
 
-        <div class="uploader__right">
-          <div class="preview">
-            <img id="imgPreview" alt="Vista previa" />
-          </div>
-        </div>
-      </div>
+<section class="card" id="listCard" hidden>
+  <h2 class="title">Productos</h2>
+  <p class="muted">Activar/ocultar o borrar.</p>
+  <div class="list" id="list"></div>
+  <div class="note" id="listMsg" hidden></div>
+</section>
+```
 
-      <div class="row">
-        <button class="btn btn--primary" id="btnPublish" type="button" disabled>Publicar</button>
-      </div>
-
-      <div class="note" id="panelMsg" hidden></div>
-    </section>
   </main>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
   <script src="./app.js"></script>
+
 </body>
 </html>
