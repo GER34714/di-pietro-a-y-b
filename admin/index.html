@@ -5,11 +5,11 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <meta name="theme-color" content="#0b0f17" />
-  <title>Di Pietro | Admin</title>
+  <title>Di Pietro Comercial | Admin</title>
   <meta name="description" content="Panel admin para cargar productos." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="./styles.css" />
 </head>
 
@@ -24,19 +24,18 @@
     <div class="wrap topbar__inner">
       <div class="brand">
         <div class="brand__mark"><img class="brand__logo" src="https://iili.io/q2i8W3x.png" alt="" /></div>
-        <div>
+        <div class="brand__text">
           <div class="brand__name">Admin</div>
           <div class="brand__sub" id="whoami">No autenticado</div>
         </div>
       </div>
       <div class="actions">
-        <button class="btn btn--soft" id="btnRefresh" type="button">Refrescar</button>
         <button class="btn btn--soft" id="btnLogout" type="button" hidden>Cerrar sesion</button>
       </div>
     </div>
   </header>
 
-  <main class="wrap main">
+  <main class="wrap">
     <section class="card" id="authCard">
       <h1 class="title">Ingresar</h1>
       <p class="muted">Solo usuarios autorizados (tabla admin_users).</p>
@@ -61,7 +60,7 @@
 
     <section class="card" id="panelCard" hidden>
       <h2 class="title">Nuevo producto</h2>
-      <p class="muted">Subi imagen, completa campos y publica. El public lee solo active=true.</p>
+      <p class="muted">Carga la imagen, completa y publica.</p>
 
       <div class="grid3">
         <div class="field">
@@ -69,12 +68,12 @@
           <input class="input" id="p_name" type="text" placeholder="Ej: Cocina industrial 4 hornallas" />
         </div>
         <div class="field">
-          <label class="label" for="p_price">Precio</label>
-          <input class="input" id="p_price" type="number" inputmode="numeric" placeholder="Ej: 150000" />
+          <label class="label" for="p_price">Precio (ARS)</label>
+          <input class="input" id="p_price" type="text" inputmode="numeric" placeholder="Ej: 339.900" />
         </div>
         <div class="field">
           <label class="label" for="p_category">Categoria</label>
-          <input class="input" id="p_category" type="text" placeholder="Ej: Cocinas" value="Otros" />
+          <input class="input" id="p_category" type="text" placeholder="Ej: Cocinas" />
         </div>
       </div>
 
@@ -87,7 +86,7 @@
         <div class="uploader__left">
           <label class="label" for="p_img">Imagen</label>
           <input class="input" id="p_img" type="file" accept="image/*" />
-          <div class="hint" id="imgHint">Selecciona una imagen. Primero preview local, luego upload a Storage.</div>
+          <div class="hint" id="imgHint">Selecciona una imagen. Primero preview, despues se sube a Storage.</div>
           <div class="status" id="imgStatus" hidden></div>
           <div class="row">
             <button class="btn btn--soft" id="btnViewRemote" type="button" hidden>Ver imagen subida</button>
@@ -111,8 +110,11 @@
 
     <section class="card" id="listCard" hidden>
       <h2 class="title">Productos</h2>
-      <p class="muted">Activar/ocultar o borrar.</p>
+      <p class="muted">Activa / oculta / borra.</p>
       <div class="list" id="list"></div>
+      <div class="row">
+        <button class="btn btn--soft" id="btnRefresh" type="button">Actualizar lista</button>
+      </div>
       <div class="note" id="listMsg" hidden></div>
     </section>
   </main>
