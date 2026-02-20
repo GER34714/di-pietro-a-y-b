@@ -1,323 +1,111 @@
-// =========================
-// /admin/app.js
-// =========================
-
-// CONFIG (YA PEGADO CON TUS DATOS)
-const SUPABASE_URL = "https://etqcufdmduqbmilpyyfg.supabase.co";
-const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV0cWN1ZmRtZHVxYm1pbHB5eWZnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE1NTQ1NzIsImV4cCI6MjA4NzEzMDU3Mn0.fHrf3E9HmEjOyzh8n7eusvy_SOkQf4zshDpxRzKGx10";
-
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
-
-const authBox = document.getElementById("authBox");
-const adminBox = document.getElementById("adminBox");
-
-const emailInput = document.getElementById("emailInput");
-const passInput = document.getElementById("passInput");
-const loginBtn = document.getElementById("loginBtn");
-const logoutBtn = document.getElementById("logoutBtn");
-const authMsg = document.getElementById("authMsg");
-const userEmail = document.getElementById("userEmail");
-
-const imageInput = document.getElementById("imageInput");
-const previewImg = document.getElementById("previewImg");
-
-const nameInput = document.getElementById("nameInput");
-const priceInput = document.getElementById("priceInput");
-const categoryInput = document.getElementById("categoryInput");
-const activeSelect = document.getElementById("activeSelect");
-const descInput = document.getElementById("descInput");
-
-const publishBtn = document.getElementById("publishBtn");
-const adminMsg = document.getElementById("adminMsg");
-const listEl = document.getElementById("list");
-const refreshBtn = document.getElementById("refreshBtn");
-
-let uploadedImageUrl = "";
-
-function setAuthMsg(msg){ authMsg.textContent = msg || ""; }
-function setAdminMsg(msg){ adminMsg.textContent = msg || ""; }
-
-function escapeHtml(s){
-  return String(s ?? "")
-    .replaceAll("&","&amp;")
-    .replaceAll("<","&lt;")
-    .replaceAll(">","&gt;")
-    .replaceAll('"',"&quot;")
-    .replaceAll("'","&#039;");
+/* /admin/styles.css */
+:root{
+  --bg: #fbf7f0;
+  --text: #1f2937;
+  --muted: #6b7280;
+  --line: rgba(31,41,55,.10);
+  --shadow: 0 18px 60px rgba(31,41,55,.12);
+  --accent: #16a34a;
+  --accent2: #0ea5e9;
 }
-
-function money(n){
-  try{
-    return new Intl.NumberFormat("es-AR",{style:"currency",currency:"ARS"}).format(Number(n||0));
-  }catch{
-    return "$" + Number(n||0).toFixed(2);
-  }
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  color: var(--text);
+  background:
+    radial-gradient(900px 600px at 15% -10%, rgba(255, 225, 207, .70), transparent 55%),
+    radial-gradient(900px 600px at 90% 0%, rgba(223, 247, 238, .70), transparent 55%),
+    radial-gradient(900px 600px at 70% 95%, rgba(236, 233, 255, .70), transparent 55%),
+    var(--bg);
 }
-
-async function selfWhitelistCheck(email){
-  // Policy permite SELECT solo si email == jwt email
-  const { data, error } = await supabase
-    .from("admin_users")
-    .select("email")
-    .eq("email", email)
-    .maybeSingle();
-
-  if(error){
-    console.error(error);
-    return { ok:false, reason:"No se pudo verificar whitelist. Revisa policy admin_users." };
-  }
-  if(!data?.email){
-    return { ok:false, reason:"Solo usuarios autorizados (whitelist)." };
-  }
-  return { ok:true };
+.wrap{width:min(1120px, 92vw); margin:0 auto}
+.topbar{
+  position:sticky; top:0; z-index:50;
+  backdrop-filter: blur(10px);
+  background: rgba(251,247,240,.75);
+  border-bottom: 1px solid var(--line);
 }
-
-async function guardAdmin(){
-  const { data } = await supabase.auth.getSession();
-  const session = data?.session;
-
-  if(!session){
-    authBox.style.display = "block";
-    adminBox.style.display = "none";
-    userEmail.textContent = "";
-    return;
-  }
-
-  const email = session.user.email || "";
-  const check = await selfWhitelistCheck(email);
-
-  if(!check.ok){
-    setAuthMsg(check.reason);
-    await supabase.auth.signOut();
-    authBox.style.display = "block";
-    adminBox.style.display = "none";
-    userEmail.textContent = "";
-    return;
-  }
-
-  userEmail.textContent = email;
-  setAuthMsg("");
-  authBox.style.display = "none";
-  adminBox.style.display = "block";
-  await loadProductsList();
+.topbar__inner{display:flex; align-items:center; justify-content:space-between; padding:14px 0; gap:12px}
+.topbar__right{display:flex; align-items:center; gap:10px}
+.brand__title{font-weight:1100}
+.brand__subtitle{color:var(--muted); font-size:13px; margin-top:2px}
+.muted{color:var(--muted); font-size:13px}
+.panel{
+  margin: 18px 0;
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  background: rgba(255,255,255,.78);
+  box-shadow: var(--shadow);
+  padding: 14px;
 }
-
-loginBtn.addEventListener("click", async ()=>{
-  setAuthMsg("Ingresando...");
-
-  const email = (emailInput.value||"").trim();
-  const password = passInput.value || "";
-
-  if(!email || !password){
-    setAuthMsg("Completa email y password.");
-    return;
-  }
-
-  const { error } = await supabase.auth.signInWithPassword({ email, password });
-  if(error){
-    console.error(error);
-    setAuthMsg("No autenticado. Revisa email/password.");
-    return;
-  }
-
-  await guardAdmin();
-});
-
-logoutBtn.addEventListener("click", async ()=>{
-  await supabase.auth.signOut();
-  uploadedImageUrl = "";
-  previewImg.removeAttribute("src");
-  imageInput.value = "";
-  setAdminMsg("");
-  setAuthMsg("");
-  await guardAdmin();
-});
-
-refreshBtn.addEventListener("click", loadProductsList);
-
-imageInput.addEventListener("change", async ()=>{
-  setAdminMsg("");
-  const file = imageInput.files?.[0];
-  if(!file) return;
-
-  if(!file.type.startsWith("image/")){
-    setAdminMsg("El archivo debe ser una imagen.");
-    imageInput.value = "";
-    return;
-  }
-
-  previewImg.src = URL.createObjectURL(file);
-  setAdminMsg("Subiendo imagen...");
-
-  const ext = (file.name.split(".").pop() || "jpg").toLowerCase().replace(/[^a-z0-9]/g,"") || "jpg";
-  const path = `products/${Date.now()}_${Math.random().toString(16).slice(2)}.${ext}`;
-
-  const { error: upErr } = await supabase
-    .storage
-    .from("product-images")
-    .upload(path, file, { upsert:false, contentType:file.type });
-
-  if(upErr){
-    console.error(upErr);
-    setAdminMsg("Error al subir la imagen. Revisa storage policy/whitelist.");
-    return;
-  }
-
-  const { data: pub } = supabase
-    .storage
-    .from("product-images")
-    .getPublicUrl(path);
-
-  uploadedImageUrl = pub?.publicUrl || "";
-  if(!uploadedImageUrl){
-    setAdminMsg("La imagen se subio, pero no se pudo obtener URL publica.");
-    return;
-  }
-
-  setAdminMsg("Imagen subida OK.");
-});
-
-publishBtn.addEventListener("click", async ()=>{
-  setAdminMsg("");
-
-  const name = (nameInput.value||"").trim();
-  const description = (descInput.value||"").trim();
-  const category = (categoryInput.value||"").trim();
-  const active = activeSelect.value === "true";
-  const priceRaw = (priceInput.value||"").trim();
-  const price = Number(priceRaw);
-
-  if(!uploadedImageUrl){
-    setAdminMsg("Falta subir la imagen.");
-    return;
-  }
-  if(!name){
-    setAdminMsg("Falta el nombre.");
-    return;
-  }
-  if(!priceRaw || Number.isNaN(price) || price <= 0){
-    setAdminMsg("Precio invalido. Usa un numero (ej 339.90).");
-    return;
-  }
-
-  setAdminMsg("Publicando producto...");
-
-  const { error } = await supabase
-    .from("products")
-    .insert([{
-      name,
-      description,
-      price,
-      category,
-      image_url: uploadedImageUrl,
-      active
-    }]);
-
-  if(error){
-    console.error(error);
-    setAdminMsg("No se pudo publicar. Revisa RLS/whitelist en products.");
-    return;
-  }
-
-  nameInput.value = "";
-  priceInput.value = "";
-  categoryInput.value = "";
-  descInput.value = "";
-  activeSelect.value = "true";
-  imageInput.value = "";
-  uploadedImageUrl = "";
-  previewImg.removeAttribute("src");
-
-  setAdminMsg("Publicado OK.");
-  await loadProductsList();
-});
-
-async function loadProductsList(){
-  setAdminMsg("");
-
-  const { data, error } = await supabase
-    .from("products")
-    .select("id,name,price,category,active,created_at")
-    .order("created_at", { ascending:false })
-    .limit(300);
-
-  if(error){
-    console.error(error);
-    listEl.innerHTML = `<div class="msg">No se pudieron cargar productos. Revisa RLS.</div>`;
-    return;
-  }
-
-  const items = data || [];
-  if(!items.length){
-    listEl.innerHTML = `<div class="msg">No hay productos cargados.</div>`;
-    return;
-  }
-
-  listEl.innerHTML = items.map((p)=>{
-    return `
-      <div class="item">
-        <div>
-          <div class="item__title">${escapeHtml(p.name)}</div>
-          <div class="item__meta">${escapeHtml(p.category||"")} | ${money(p.price)}</div>
-          <div class="item__meta">${new Date(p.created_at).toLocaleString("es-AR")} | ${p.active ? "Activo" : "Inactivo"}</div>
-        </div>
-        <div class="item__actions">
-          <span class="pill">${p.active ? "ON" : "OFF"}</span>
-          <button class="btn btn--ghost" data-toggle="${p.id}" type="button">${p.active ? "Desactivar" : "Activar"}</button>
-          <button class="btn btn--danger" data-del="${p.id}" type="button">Borrar</button>
-        </div>
-      </div>
-    `;
-  }).join("");
-
-  listEl.querySelectorAll("[data-toggle]").forEach((btn)=>{
-    btn.addEventListener("click", async ()=>{
-      const id = btn.getAttribute("data-toggle");
-      const current = items.find(x=>x.id===id);
-      if(!current) return;
-
-      btn.disabled = true;
-      const next = !current.active;
-
-      const { error: upErr } = await supabase
-        .from("products")
-        .update({ active: next })
-        .eq("id", id);
-
-      if(upErr){
-        console.error(upErr);
-        setAdminMsg("No se pudo actualizar el estado.");
-      }else{
-        await loadProductsList();
-      }
-      btn.disabled = false;
-    });
-  });
-
-  listEl.querySelectorAll("[data-del]").forEach((btn)=>{
-    btn.addEventListener("click", async ()=>{
-      const id = btn.getAttribute("data-del");
-      const ok = confirm("Borrar este producto? No se puede deshacer.");
-      if(!ok) return;
-
-      btn.disabled = true;
-
-      const { error: delErr } = await supabase
-        .from("products")
-        .delete()
-        .eq("id", id);
-
-      if(delErr){
-        console.error(delErr);
-        setAdminMsg("No se pudo borrar.");
-      }else{
-        await loadProductsList();
-      }
-
-      btn.disabled = false;
-    });
-  });
+.panel h1{margin:0 0 6px}
+.panel h2{margin:0}
+.admin{padding-bottom: 30px}
+.grid2{display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin:10px 0}
+.field label{display:block; font-size:12px; color:var(--muted); margin-bottom:6px}
+.field input, .field select, .field textarea{
+  width:100%;
+  padding:11px 12px;
+  border-radius: 14px;
+  border:1px solid var(--line);
+  background: rgba(255,255,255,.84);
+  color: var(--text);
+  outline:none;
+  box-shadow: 0 10px 30px rgba(31,41,55,.06);
 }
-
-supabase.auth.onAuthStateChange(()=>{ guardAdmin(); });
-guardAdmin();
+.field textarea{resize:vertical}
+.btn{
+  border:1px solid var(--line);
+  background: rgba(255,255,255,.84);
+  color: var(--text);
+  padding: 10px 12px;
+  border-radius: 14px;
+  cursor:pointer;
+  font-weight:1100;
+  box-shadow: 0 10px 30px rgba(31,41,55,.08);
+}
+.btn--primary{
+  background: linear-gradient(135deg, rgba(22,163,74,.95), rgba(14,165,233,.55));
+  border-color: rgba(22,163,74,.20);
+  color: #0b1a10;
+}
+.btn--ghost{background: rgba(255,255,255,.72)}
+.btn--danger{background: rgba(239,68,68,.14); border-color: rgba(239,68,68,.18); color: #7f1d1d}
+.msg{margin-top:10px; color: var(--muted); font-size:13px; line-height:1.35; min-height:18px}
+.preview{
+  width:100%;
+  aspect-ratio: 4 / 3;
+  border-radius: 18px;
+  border:1px solid var(--line);
+  background: rgba(255,255,255,.70);
+  overflow:hidden;
+}
+.preview img{width:100%; height:100%; object-fit:cover; display:block}
+.row{display:flex; align-items:center; justify-content:space-between; gap:12px}
+.list{margin-top:12px; display:flex; flex-direction:column; gap:10px}
+.item{
+  border:1px solid rgba(31,41,55,.10);
+  border-radius: 18px;
+  background: rgba(255,255,255,.70);
+  padding: 12px;
+  display:grid;
+  grid-template-columns: 1fr auto;
+  gap:10px;
+}
+.item__title{font-weight:1200}
+.item__meta{color:var(--muted); font-size:12px; margin-top:4px}
+.item__actions{display:flex; gap:8px; align-items:center; flex-wrap:wrap}
+.pill{
+  display:inline-flex; align-items:center; justify-content:center;
+  padding:6px 10px;
+  border-radius: 999px;
+  border:1px solid rgba(31,41,55,.10);
+  background: rgba(31,41,55,.04);
+  font-size:12px;
+  font-weight:1100;
+}
+.footer{border-top:1px solid rgba(31,41,55,.10); background: rgba(255,255,255,.45)}
+.footer__inner{padding: 18px 0; color: var(--muted)}
+@media (max-width: 900px){ .grid2{grid-template-columns: 1fr} }
