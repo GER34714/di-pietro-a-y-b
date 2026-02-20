@@ -1,314 +1,323 @@
-// admin/app.js
-const SUPABASE_URL = "https://tgzcpnhrqyvldvbbbuen.supabase.co";
-const SUPABASE_ANON_KEY = "sb_publishable_5ww2RCVjjnHS8P1T2n9FZw_wzZr4ZAg";
-const BUCKET = "imagenes y videos di pietro";
+// =========================
+// /admin/app.js
+// =========================
 
-const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-const $ = (id) => document.getElementById(id);
+// CONFIG (YA PEGADO CON TUS DATOS)
+const SUPABASE_URL = "https://etqcufdmduqbmilpyyfg.supabase.co";
+const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV0cWN1ZmRtZHVxYm1pbHB5eWZnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE1NTQ1NzIsImV4cCI6MjA4NzEzMDU3Mn0.fHrf3E9HmEjOyzh8n7eusvy_SOkQf4zshDpxRzKGx10";
 
-function safeText(s){ return (s || "").toString().trim(); }
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
 
-function setNote(el, msg, show){
-  el.textContent = safeText(msg);
-  el.hidden = !show;
+const authBox = document.getElementById("authBox");
+const adminBox = document.getElementById("adminBox");
+
+const emailInput = document.getElementById("emailInput");
+const passInput = document.getElementById("passInput");
+const loginBtn = document.getElementById("loginBtn");
+const logoutBtn = document.getElementById("logoutBtn");
+const authMsg = document.getElementById("authMsg");
+const userEmail = document.getElementById("userEmail");
+
+const imageInput = document.getElementById("imageInput");
+const previewImg = document.getElementById("previewImg");
+
+const nameInput = document.getElementById("nameInput");
+const priceInput = document.getElementById("priceInput");
+const categoryInput = document.getElementById("categoryInput");
+const activeSelect = document.getElementById("activeSelect");
+const descInput = document.getElementById("descInput");
+
+const publishBtn = document.getElementById("publishBtn");
+const adminMsg = document.getElementById("adminMsg");
+const listEl = document.getElementById("list");
+const refreshBtn = document.getElementById("refreshBtn");
+
+let uploadedImageUrl = "";
+
+function setAuthMsg(msg){ authMsg.textContent = msg || ""; }
+function setAdminMsg(msg){ adminMsg.textContent = msg || ""; }
+
+function escapeHtml(s){
+  return String(s ?? "")
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
 }
 
-function moneyARS(n){
-  const v = Number(n || 0);
-  return v.toLocaleString("es-AR", { style:"currency", currency:"ARS", maximumFractionDigits:0 });
+function money(n){
+  try{
+    return new Intl.NumberFormat("es-AR",{style:"currency",currency:"ARS"}).format(Number(n||0));
+  }catch{
+    return "$" + Number(n||0).toFixed(2);
+  }
 }
 
-function parsePriceARS(raw){
-  let s = (raw || "").toString().trim();
-  s = s.replace(/[^\d.,]/g, "");
-  if (!s) return 0;
-  const parts = s.split(",");
-  const intPart = (parts[0] || "").replace(/\./g, "");
-  const n = Number(intPart);
-  return Number.isFinite(n) ? n : 0;
-}
-
-function formatPriceARS(n){
-  const v = Number(n || 0);
-  return v ? v.toLocaleString("es-AR") : "";
-}
-
-let sessionUser = null;
-let uploaded = { path:null, publicUrl:null };
-
-async function getSession(){
-  const { data } = await supabaseClient.auth.getSession();
-  sessionUser = data?.session?.user || null;
-  return sessionUser;
-}
-
-async function checkAdmin(){
-  if (!sessionUser?.id) return false;
-  const { data, error } = await supabaseClient
+async function selfWhitelistCheck(email){
+  // Policy permite SELECT solo si email == jwt email
+  const { data, error } = await supabase
     .from("admin_users")
-    .select("user_id")
-    .eq("user_id", sessionUser.id)
+    .select("email")
+    .eq("email", email)
     .maybeSingle();
 
-  if (error) { console.error(error); return false; }
-  return !!data?.user_id;
+  if(error){
+    console.error(error);
+    return { ok:false, reason:"No se pudo verificar whitelist. Revisa policy admin_users." };
+  }
+  if(!data?.email){
+    return { ok:false, reason:"Solo usuarios autorizados (whitelist)." };
+  }
+  return { ok:true };
 }
 
-function showUI(isAdmin){
-  $("authCard").hidden = isAdmin;
-  $("panelCard").hidden = !isAdmin;
-  $("listCard").hidden = !isAdmin;
+async function guardAdmin(){
+  const { data } = await supabase.auth.getSession();
+  const session = data?.session;
 
-  $("btnLogout").hidden = !isAdmin;
-  $("whoami").textContent = isAdmin && sessionUser?.email ? sessionUser.email : "No autenticado";
-}
-
-async function uploadSelectedFile(file){
-  uploaded = { path:null, publicUrl:null };
-  $("btnPublish").disabled = true;
-  $("btnViewRemote").hidden = true;
-  $("btnClearImage").hidden = true;
-
-  if (!file){
-    $("imgPreview").removeAttribute("src");
-    $("imgHint").textContent = "Selecciona una imagen. Primero preview, despues se sube a Storage.";
-    setNote($("imgStatus"), "", false);
+  if(!session){
+    authBox.style.display = "block";
+    adminBox.style.display = "none";
+    userEmail.textContent = "";
     return;
   }
 
-  try { $("imgPreview").src = URL.createObjectURL(file); } catch {}
+  const email = session.user.email || "";
+  const check = await selfWhitelistCheck(email);
 
-  const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
-  const base = `${Date.now()}-${Math.random().toString(16).slice(2)}`;
-  const path = `products/${base}.${ext}`;
+  if(!check.ok){
+    setAuthMsg(check.reason);
+    await supabase.auth.signOut();
+    authBox.style.display = "block";
+    adminBox.style.display = "none";
+    userEmail.textContent = "";
+    return;
+  }
 
-  $("imgHint").textContent = "Subiendo imagen...";
-  setNote($("imgStatus"), `Subiendo a Storage... (bucket: ${BUCKET})`, true);
+  userEmail.textContent = email;
+  setAuthMsg("");
+  authBox.style.display = "none";
+  adminBox.style.display = "block";
+  await loadProductsList();
+}
 
-  const { error: upErr } = await supabaseClient.storage
-    .from(BUCKET)
-    .upload(path, file, { upsert:false, cacheControl:"3600" });
+loginBtn.addEventListener("click", async ()=>{
+  setAuthMsg("Ingresando...");
 
-  if (upErr){
+  const email = (emailInput.value||"").trim();
+  const password = passInput.value || "";
+
+  if(!email || !password){
+    setAuthMsg("Completa email y password.");
+    return;
+  }
+
+  const { error } = await supabase.auth.signInWithPassword({ email, password });
+  if(error){
+    console.error(error);
+    setAuthMsg("No autenticado. Revisa email/password.");
+    return;
+  }
+
+  await guardAdmin();
+});
+
+logoutBtn.addEventListener("click", async ()=>{
+  await supabase.auth.signOut();
+  uploadedImageUrl = "";
+  previewImg.removeAttribute("src");
+  imageInput.value = "";
+  setAdminMsg("");
+  setAuthMsg("");
+  await guardAdmin();
+});
+
+refreshBtn.addEventListener("click", loadProductsList);
+
+imageInput.addEventListener("change", async ()=>{
+  setAdminMsg("");
+  const file = imageInput.files?.[0];
+  if(!file) return;
+
+  if(!file.type.startsWith("image/")){
+    setAdminMsg("El archivo debe ser una imagen.");
+    imageInput.value = "";
+    return;
+  }
+
+  previewImg.src = URL.createObjectURL(file);
+  setAdminMsg("Subiendo imagen...");
+
+  const ext = (file.name.split(".").pop() || "jpg").toLowerCase().replace(/[^a-z0-9]/g,"") || "jpg";
+  const path = `products/${Date.now()}_${Math.random().toString(16).slice(2)}.${ext}`;
+
+  const { error: upErr } = await supabase
+    .storage
+    .from("product-images")
+    .upload(path, file, { upsert:false, contentType:file.type });
+
+  if(upErr){
     console.error(upErr);
-    $("imgHint").textContent = "Error al subir la imagen.";
-    setNote($("imgStatus"), `Error upload: ${upErr.message || upErr}`, true);
+    setAdminMsg("Error al subir la imagen. Revisa storage policy/whitelist.");
     return;
   }
 
-  const { data: pub } = supabaseClient.storage.from(BUCKET).getPublicUrl(path);
-  const publicUrl = pub?.publicUrl || null;
+  const { data: pub } = supabase
+    .storage
+    .from("product-images")
+    .getPublicUrl(path);
 
-  uploaded = { path, publicUrl };
+  uploadedImageUrl = pub?.publicUrl || "";
+  if(!uploadedImageUrl){
+    setAdminMsg("La imagen se subio, pero no se pudo obtener URL publica.");
+    return;
+  }
 
-  $("imgHint").textContent = "Imagen subida OK.";
-  setNote($("imgStatus"), "Imagen subida OK. Ahora publica.", true);
-  $("btnViewRemote").hidden = !publicUrl;
-  $("btnClearImage").hidden = false;
-  $("btnPublish").disabled = false;
-}
+  setAdminMsg("Imagen subida OK.");
+});
 
-function clearImage(){
-  uploaded = { path:null, publicUrl:null };
-  $("p_img").value = "";
-  $("imgPreview").removeAttribute("src");
-  $("imgHint").textContent = "Selecciona una imagen. Primero preview, despues se sube a Storage.";
-  setNote($("imgStatus"), "", false);
-  $("btnPublish").disabled = true;
-  $("btnViewRemote").hidden = true;
-  $("btnClearImage").hidden = true;
-}
+publishBtn.addEventListener("click", async ()=>{
+  setAdminMsg("");
 
-async function createProduct(payload){
-  const { error } = await supabaseClient.from("products").insert(payload);
-  if (error) throw error;
-}
+  const name = (nameInput.value||"").trim();
+  const description = (descInput.value||"").trim();
+  const category = (categoryInput.value||"").trim();
+  const active = activeSelect.value === "true";
+  const priceRaw = (priceInput.value||"").trim();
+  const price = Number(priceRaw);
 
-async function fetchAllProductsAdmin(){
-  const { data, error } = await supabaseClient
+  if(!uploadedImageUrl){
+    setAdminMsg("Falta subir la imagen.");
+    return;
+  }
+  if(!name){
+    setAdminMsg("Falta el nombre.");
+    return;
+  }
+  if(!priceRaw || Number.isNaN(price) || price <= 0){
+    setAdminMsg("Precio invalido. Usa un numero (ej 339.90).");
+    return;
+  }
+
+  setAdminMsg("Publicando producto...");
+
+  const { error } = await supabase
+    .from("products")
+    .insert([{
+      name,
+      description,
+      price,
+      category,
+      image_url: uploadedImageUrl,
+      active
+    }]);
+
+  if(error){
+    console.error(error);
+    setAdminMsg("No se pudo publicar. Revisa RLS/whitelist en products.");
+    return;
+  }
+
+  nameInput.value = "";
+  priceInput.value = "";
+  categoryInput.value = "";
+  descInput.value = "";
+  activeSelect.value = "true";
+  imageInput.value = "";
+  uploadedImageUrl = "";
+  previewImg.removeAttribute("src");
+
+  setAdminMsg("Publicado OK.");
+  await loadProductsList();
+});
+
+async function loadProductsList(){
+  setAdminMsg("");
+
+  const { data, error } = await supabase
     .from("products")
     .select("id,name,price,category,active,created_at")
-    .order("created_at", { ascending:false });
+    .order("created_at", { ascending:false })
+    .limit(300);
 
-  if (error) throw error;
-  return Array.isArray(data) ? data : [];
-}
+  if(error){
+    console.error(error);
+    listEl.innerHTML = `<div class="msg">No se pudieron cargar productos. Revisa RLS.</div>`;
+    return;
+  }
 
-async function setActive(id, active){
-  const { error } = await supabaseClient.from("products").update({ active }).eq("id", id);
-  if (error) throw error;
-}
+  const items = data || [];
+  if(!items.length){
+    listEl.innerHTML = `<div class="msg">No hay productos cargados.</div>`;
+    return;
+  }
 
-async function deleteProduct(id){
-  const { error } = await supabaseClient.from("products").delete().eq("id", id);
-  if (error) throw error;
-}
-
-async function renderList(){
-  const el = $("list");
-  el.innerHTML = "";
-  try{
-    const items = await fetchAllProductsAdmin();
-    if (!items.length){
-      el.innerHTML = `<div class="note">No hay productos cargados todavia.</div>`;
-      return;
-    }
-
-    for (const p of items){
-      const row = document.createElement("div");
-      row.className = "item";
-      row.innerHTML = `
+  listEl.innerHTML = items.map((p)=>{
+    return `
+      <div class="item">
         <div>
-          <div class="itemTitle">${safeText(p.name)}</div>
-          <div class="itemMeta">${safeText(p.category)} | ${moneyARS(p.price)} | ${p.active ? "ACTIVO" : "OCULTO"}</div>
+          <div class="item__title">${escapeHtml(p.name)}</div>
+          <div class="item__meta">${escapeHtml(p.category||"")} | ${money(p.price)}</div>
+          <div class="item__meta">${new Date(p.created_at).toLocaleString("es-AR")} | ${p.active ? "Activo" : "Inactivo"}</div>
         </div>
-        <div class="itemActions">
-          <button class="btn btn--soft" type="button" data-toggle="${p.id}">${p.active ? "Ocultar" : "Activar"}</button>
-          <button class="btn btn--danger" type="button" data-del="${p.id}">Borrar</button>
+        <div class="item__actions">
+          <span class="pill">${p.active ? "ON" : "OFF"}</span>
+          <button class="btn btn--ghost" data-toggle="${p.id}" type="button">${p.active ? "Desactivar" : "Activar"}</button>
+          <button class="btn btn--danger" data-del="${p.id}" type="button">Borrar</button>
         </div>
-      `;
+      </div>
+    `;
+  }).join("");
 
-      row.addEventListener("click", async (e)=>{
-        const tBtn = e.target.closest("[data-toggle]");
-        const dBtn = e.target.closest("[data-del]");
-        try{
-          if (tBtn){
-            const id = tBtn.getAttribute("data-toggle");
-            await setActive(id, !p.active);
-            await renderList();
-          }
-          if (dBtn){
-            const id = dBtn.getAttribute("data-del");
-            await deleteProduct(id);
-            await renderList();
-          }
-        }catch(err){
-          console.error(err);
-          setNote($("listMsg"), `Error: ${err.message || err}`, true);
-        }
-      });
+  listEl.querySelectorAll("[data-toggle]").forEach((btn)=>{
+    btn.addEventListener("click", async ()=>{
+      const id = btn.getAttribute("data-toggle");
+      const current = items.find(x=>x.id===id);
+      if(!current) return;
 
-      el.appendChild(row);
-    }
-  }catch(err){
-    console.error(err);
-    el.innerHTML = `<div class="note">Error cargando lista: ${safeText(err.message || err)}</div>`;
-  }
-}
+      btn.disabled = true;
+      const next = !current.active;
 
-async function doLogin(){
-  const email = safeText($("email").value);
-  const password = safeText($("pass").value);
-  setNote($("authMsg"), "Entrando...", true);
+      const { error: upErr } = await supabase
+        .from("products")
+        .update({ active: next })
+        .eq("id", id);
 
-  const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
-  if (error){
-    setNote($("authMsg"), `Error: ${error.message}`, true);
-    return;
-  }
-  sessionUser = data?.user || null;
-  await boot();
-}
-
-async function doLogout(){
-  await supabaseClient.auth.signOut();
-  location.reload();
-}
-
-async function doPublish(){
-  try{
-    setNote($("panelMsg"), "Publicando...", true);
-
-    if (!uploaded.publicUrl){
-      setNote($("panelMsg"), "Falta la imagen (subila primero).", true);
-      return;
-    }
-
-    const name = safeText($("p_name").value);
-    const description = safeText($("p_desc").value);
-    const category = safeText($("p_category").value) || "Otros";
-    const price = parsePriceARS($("p_price").value);
-
-    if (!name){
-      setNote($("panelMsg"), "Falta el nombre.", true);
-      return;
-    }
-    if (!price || price <= 0){
-      setNote($("panelMsg"), "Precio invalido. Ej: 339.900", true);
-      return;
-    }
-
-    const payload = {
-      name,
-      price,
-      description,
-      category,
-      image_url: uploaded.publicUrl,
-      badges: [],
-      active: true
-    };
-
-    await createProduct(payload);
-
-    setNote($("panelMsg"), "Producto publicado OK. Ya aparece en la web.", true);
-
-    $("p_name").value = "";
-    $("p_price").value = "";
-    $("p_desc").value = "";
-    $("p_category").value = "";
-    clearImage();
-    await renderList();
-  }catch(err){
-    console.error(err);
-    setNote($("panelMsg"), `Error: ${err.message || err}`, true);
-  }
-}
-
-async function boot(){
-  await getSession();
-
-  if (!sessionUser){
-    showUI(false);
-    setNote($("authMsg"), "Entrá con tu usuario admin de Supabase Auth.", true);
-    return;
-  }
-
-  const ok = await checkAdmin();
-  if (!ok){
-    showUI(false);
-    setNote($("authMsg"), "No autorizado. Falta tu UID en la tabla admin_users.", true);
-    return;
-  }
-
-  showUI(true);
-  setNote($("authMsg"), "", false);
-  setNote($("panelMsg"), `Listo. Subi una imagen y publica. (bucket: ${BUCKET})`, true);
-  await renderList();
-}
-
-function init(){
-  $("btnLogin").addEventListener("click", doLogin);
-  $("btnLogout").addEventListener("click", doLogout);
-  $("btnPublish").addEventListener("click", doPublish);
-  $("btnRefresh").addEventListener("click", renderList);
-
-  $("p_img").addEventListener("change", async (e)=>{
-    const file = e.target.files && e.target.files[0] ? e.target.files[0] : null;
-    await uploadSelectedFile(file);
+      if(upErr){
+        console.error(upErr);
+        setAdminMsg("No se pudo actualizar el estado.");
+      }else{
+        await loadProductsList();
+      }
+      btn.disabled = false;
+    });
   });
 
-  $("btnViewRemote").addEventListener("click", ()=>{
-    if (uploaded.publicUrl) window.open(uploaded.publicUrl, "_blank", "noopener");
+  listEl.querySelectorAll("[data-del]").forEach((btn)=>{
+    btn.addEventListener("click", async ()=>{
+      const id = btn.getAttribute("data-del");
+      const ok = confirm("Borrar este producto? No se puede deshacer.");
+      if(!ok) return;
+
+      btn.disabled = true;
+
+      const { error: delErr } = await supabase
+        .from("products")
+        .delete()
+        .eq("id", id);
+
+      if(delErr){
+        console.error(delErr);
+        setAdminMsg("No se pudo borrar.");
+      }else{
+        await loadProductsList();
+      }
+
+      btn.disabled = false;
+    });
   });
-
-  $("btnClearImage").addEventListener("click", clearImage);
-
-  $("p_price").addEventListener("blur", ()=>{
-    const n = parsePriceARS($("p_price").value);
-    $("p_price").value = n ? formatPriceARS(n) : "";
-  });
-
-  boot();
 }
 
-init();
+supabase.auth.onAuthStateChange(()=>{ guardAdmin(); });
+guardAdmin();
