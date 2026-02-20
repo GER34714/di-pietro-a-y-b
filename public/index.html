@@ -1,265 +1,263 @@
-// admin/app.js
-const SUPABASE_URL = "https://tgzcpnhrqyvldvbbbuen.supabase.co";
-const SUPABASE_ANON_KEY = "sb_publishable_5ww2RCVjjnHS8P1T2n9FZw_wzZr4ZAg";
-const BUCKET = "imagenes y videos di pietro";
-const PRODUCTS_DIR = "products";
+<!-- public/index.html -->
+<!doctype html>
+<html lang="es-AR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#0b0f17" />
 
-const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  <title>Di Pietro Comercial | Catalogo</title>
+  <meta name="description" content="Catalogo online. Arma tu carrito y envia el pedido por WhatsApp." />
 
-const $ = (id) => document.getElementById(id);
-function safeText(s){ return (s || "").toString().trim(); }
-function moneyARS(n){
-  const v = Number(n || 0);
-  return v.toLocaleString("es-AR", { style:"currency", currency:"ARS", maximumFractionDigits:0 });
-}
-function showNote(el, msg, type){
-  el.hidden = !msg;
-  el.textContent = msg ? safeText(msg) : "";
-  el.classList.remove("note--err","note--ok");
-  if (type === "err") el.classList.add("note--err");
-  if (type === "ok") el.classList.add("note--ok");
-}
-function setWhoami(user, admin){
-  if (!user) { $("whoami").textContent = "No autenticado"; return; }
-  $("whoami").textContent = `${user.email || "sin-email"} | uid: ${user.id} | ${admin ? "ADMIN" : "NO ADMIN"}`;
-}
-function setUIAuthed(on){
-  $("authCard").hidden = on;
-  $("panelCard").hidden = !on;
-  $("listCard").hidden = !on;
-  $("btnLogout").hidden = !on;
-}
+  <meta property="og:title" content="Di Pietro Comercial | Catalogo" />
+  <meta property="og:description" content="Cocinas industriales, sommiers, placares e insumos. Carrito y cierre por WhatsApp." />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="https://iili.io/q2i8W3x.png" />
 
-let user = null;
-let isAdmin = false;
-let uploaded = { path:null, publicUrl:null };
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Di Pietro Comercial | Catalogo" />
+  <meta name="twitter:description" content="Arma tu carrito y envia el pedido por WhatsApp." />
+  <meta name="twitter:image" content="https://iili.io/q2i8W3x.png" />
 
-async function getSessionUser(){
-  const { data, error } = await supabaseClient.auth.getSession();
-  if (error) return null;
-  return data?.session?.user || null;
-}
-async function checkAdminWhitelist(uid){
-  if (!uid) return false;
-  const { data, error } = await supabaseClient
-    .from("admin_users")
-    .select("user_id")
-    .eq("user_id", uid)
-    .maybeSingle();
-  if (error) { console.error("checkAdmin error:", error); return false; }
-  return !!data?.user_id;
-}
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="./styles.css" />
+</head>
 
-function resetImage(){
-  uploaded = { path:null, publicUrl:null };
-  $("p_img").value = "";
-  $("imgPreview").removeAttribute("src");
-  $("btnPublish").disabled = true;
-  $("btnViewRemote").hidden = true;
-  $("btnClearImage").hidden = true;
-  $("imgHint").textContent = "Selecciona una imagen. Primero preview local, luego upload a Storage.";
-  $("imgStatus").hidden = true;
-  $("imgStatus").textContent = "";
-}
+<body>
+  <div class="bg" aria-hidden="true">
+    <div class="bg-grid"></div>
+    <div class="bg-glow"></div>
+    <div class="bg-overlay"></div>
+    <div class="bg-noise"></div>
+  </div>
 
-async function uploadFile(file){
-  uploaded = { path:null, publicUrl:null };
-  $("btnPublish").disabled = true;
-  $("btnViewRemote").hidden = true;
-  $("btnClearImage").hidden = true;
-  if (!file) return;
+  <header class="topbar" id="top">
+    <div class="wrap topbar__inner">
+      <a class="brand" href="#top" aria-label="Di Pietro Comercial">
+        <div class="brand__mark" aria-hidden="true">
+          <img class="brand__logo" src="https://iili.io/q2i8W3x.png" alt="" />
+        </div>
+        <div class="brand__text">
+          <div class="brand__name">Di Pietro Comercial</div>
+          <div class="brand__sub">Cocinas | Sommiers | Placares | Insumos</div>
+        </div>
+      </a>
 
-  try { $("imgPreview").src = URL.createObjectURL(file); } catch {}
+      <nav class="nav" aria-label="Navegacion">
+        <a class="nav__link" href="#ofertas">Ofertas</a>
+        <a class="nav__link" href="#catalogo">Catalogo</a>
+        <a class="nav__link" href="#como">Como funciona</a>
 
-  $("imgHint").textContent = "Subiendo imagen a Supabase Storage...";
-  $("imgStatus").hidden = false;
-  $("imgStatus").textContent = `Bucket: ${BUCKET}`;
+        <button class="btn btn--primary" id="openCart" type="button">
+          <span>Carrito</span>
+          <span class="pill" id="cartCount">0</span>
+        </button>
 
-  const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
-  const base = `${Date.now()}-${Math.random().toString(16).slice(2)}`;
-  const path = `${PRODUCTS_DIR}/${base}.${ext}`;
+        <button class="hamb" id="hamb" type="button" aria-label="Abrir menu" aria-expanded="false">
+          <span></span><span></span><span></span>
+        </button>
+      </nav>
+    </div>
 
-  const { error: upErr } = await supabaseClient.storage
-    .from(BUCKET)
-    .upload(path, file, { upsert:false, cacheControl:"3600" });
+    <div class="mobileMenu" id="mobileMenu" hidden>
+      <a href="#ofertas" class="mobileMenu__link">Ofertas</a>
+      <a href="#catalogo" class="mobileMenu__link">Catalogo</a>
+      <a href="#como" class="mobileMenu__link">Como funciona</a>
+      <button class="btn btn--primary mobileMenu__btn" id="openCartMobile" type="button">
+        <span>Abrir carrito</span>
+        <span class="pill" id="cartCountMobile">0</span>
+      </button>
+    </div>
+  </header>
 
-  if (upErr) {
-    console.error("upload error:", upErr);
-    $("imgHint").textContent = "Error al subir la imagen.";
-    $("imgStatus").textContent = `${upErr.message || upErr}`;
-    return;
-  }
+  <main>
+    <section class="hero">
+      <div class="wrap hero__grid">
+        <div class="hero__left">
+          <div class="kicker">CATALOGO + CIERRE POR WHATSAPP</div>
+          <h1 class="hero__title">Elegis, armas tu carrito y envias el pedido.</h1>
+          <p class="hero__desc">Precios y stock sujetos a confirmacion por WhatsApp. Respuesta rapida y coordinacion directa.</p>
 
-  const { data: pub } = supabaseClient.storage.from(BUCKET).getPublicUrl(path);
-  const publicUrl = pub?.publicUrl || null;
+          <div class="hero__cta">
+            <a class="btn btn--primary btn--lg" id="ctaWhats" href="#" target="_blank" rel="noopener">Pedir por WhatsApp</a>
+            <a class="btn btn--soft btn--lg" href="#catalogo">Ver catalogo</a>
+          </div>
 
-  uploaded = { path, publicUrl };
+          <div class="hero__bullets">
+            <div class="bullet"><div class="bullet__icon">✓</div><div><div class="bullet__title">Confirmacion</div><div class="bullet__sub">Stock y precio al momento</div></div></div>
+            <div class="bullet"><div class="bullet__icon">✓</div><div><div class="bullet__title">Entrega</div><div class="bullet__sub">Se coordina por WhatsApp</div></div></div>
+            <div class="bullet"><div class="bullet__icon">✓</div><div><div class="bullet__title">Asesoramiento</div><div class="bullet__sub">Te ayudamos a elegir</div></div></div>
+          </div>
+        </div>
 
-  $("imgHint").textContent = "Imagen subida OK.";
-  $("imgStatus").textContent = publicUrl ? "OK (publicUrl generada)" : "OK (pero sin publicUrl)";
-  $("btnClearImage").hidden = false;
+        <div class="hero__right">
+          <div class="heroCard">
+            <div class="heroCard__top">
+              <div class="heroCard__badge">LISTO PARA PEDIR</div>
+            </div>
+            <img class="heroCard__heroImg" src="https://iili.io/q2i8W3x.png" alt="Di Pietro Comercial" />
+            <div class="heroCard__glow"></div>
+          </div>
+        </div>
+      </div>
+    </section>
 
-  if (publicUrl) {
-    $("btnViewRemote").hidden = false;
-    $("btnViewRemote").onclick = () => window.open(publicUrl, "_blank", "noopener");
-    $("btnPublish").disabled = false;
-  } else {
-    $("btnPublish").disabled = true;
-  }
-}
+    <section class="offers" id="ofertas">
+      <div class="wrap">
+        <div class="sectionHead">
+          <h2 class="sectionTitle">Ofertas del mes</h2>
+          <p class="sectionDesc">Desliza y toca para ver el detalle.</p>
+        </div>
 
-async function createProduct(payload){
-  const { error } = await supabaseClient.from("products").insert(payload);
-  if (error) throw error;
-}
-async function fetchProducts(){
-  const { data, error } = await supabaseClient
-    .from("products")
-    .select("id,name,price,category,active,created_at")
-    .order("created_at", { ascending:false });
-  if (error) throw error;
-  return Array.isArray(data) ? data : [];
-}
-async function setActive(id, active){
-  const { error } = await supabaseClient.from("products").update({ active }).eq("id", id);
-  if (error) throw error;
-}
-async function deleteProduct(id){
-  const { error } = await supabaseClient.from("products").delete().eq("id", id);
-  if (error) throw error;
-}
+        <div class="offersRail" id="offersRail" aria-label="Carrusel de ofertas"></div>
 
-async function renderList(){
-  const holder = $("list");
-  holder.innerHTML = "";
-  showNote($("listMsg"), "", "");
-  try {
-    const items = await fetchProducts();
-    if (!items.length) {
-      holder.innerHTML = `<div class="status">No hay productos todavia.</div>`;
-      return;
-    }
-    for (const p of items) {
-      const div = document.createElement("div");
-      div.className = "item";
-      div.innerHTML = `
+        <div class="offersEmpty" id="offersEmpty" hidden>
+          No hay ofertas cargadas. Marca productos con badge "oferta" en Supabase para que aparezcan aca.
+        </div>
+      </div>
+    </section>
+
+    <section class="catalog" id="catalogo">
+      <div class="wrap">
+        <div class="sectionHead">
+          <h2 class="sectionTitle">Catalogo</h2>
+          <p class="sectionDesc">Busca, filtra y toca un producto para ver la ficha completa.</p>
+        </div>
+
+        <div class="filters">
+          <div class="field">
+            <label class="label" for="q">Buscar</label>
+            <input class="input" id="q" type="search" placeholder="Ej: cocina, sommier, placard..." autocomplete="off" />
+          </div>
+
+          <div class="field">
+            <label class="label" for="cat">Categoria</label>
+            <select class="select" id="cat">
+              <option value="all">Todas</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label class="label" for="sort">Orden</label>
+            <select class="select" id="sort">
+              <option value="new">Mas nuevos</option>
+              <option value="priceAsc">Menor precio</option>
+              <option value="priceDesc">Mayor precio</option>
+              <option value="nameAsc">Nombre A-Z</option>
+            </select>
+          </div>
+
+          <div class="field field--actions">
+            <button class="btn btn--soft" id="clearFilters" type="button">Limpiar</button>
+          </div>
+        </div>
+
+        <div class="grid" id="grid"></div>
+
+        <div class="empty" id="empty" hidden>
+          <div class="empty__title">No hay productos para mostrar</div>
+          <div class="empty__desc">Proba con otro filtro o mas tarde.</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="how" id="como">
+      <div class="wrap">
+        <div class="sectionHead">
+          <h2 class="sectionTitle">Como funciona</h2>
+          <p class="sectionDesc">Proceso simple para cerrar por WhatsApp.</p>
+        </div>
+
+        <div class="bento">
+          <div class="bentoCard"><div class="bentoTitle">1) Elegis</div><div class="bentoText">Busca y toca un producto para ver la ficha.</div></div>
+          <div class="bentoCard"><div class="bentoTitle">2) Carrito</div><div class="bentoText">Agrega cantidades y revisa el total.</div></div>
+          <div class="bentoCard"><div class="bentoTitle">3) Enviar</div><div class="bentoText">Se arma el mensaje listo para WhatsApp.</div></div>
+          <div class="bentoCard"><div class="bentoTitle">4) Confirmacion</div><div class="bentoText">Confirmamos stock, precio y entrega.</div></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <a class="waFloat" id="waFloat" href="#" target="_blank" rel="noopener" aria-label="WhatsApp">
+    <img src="https://iili.io/fm1NjzQ.jpg" alt="WhatsApp" />
+  </a>
+
+  <div class="drawer" id="drawer" aria-hidden="true">
+    <div class="drawer__backdrop" id="drawerBackdrop"></div>
+    <div class="drawer__panel" role="dialog" aria-modal="true" aria-label="Carrito">
+      <div class="drawer__head">
         <div>
-          <div class="itemTitle">${safeText(p.name)}</div>
-          <div class="itemMeta">${safeText(p.category)} - ${moneyARS(p.price)} - ${p.active ? "ACTIVO" : "OCULTO"}</div>
+          <div class="drawer__title">Carrito</div>
+          <div class="drawer__sub" id="drawerSub">0 items</div>
         </div>
-        <div class="itemActions">
-          <button class="btn btn--soft" type="button" data-toggle="${p.id}">${p.active ? "Ocultar" : "Activar"}</button>
-          <button class="btn btn--danger" type="button" data-del="${p.id}">Borrar</button>
+        <button class="iconBtn" id="closeCart" type="button" aria-label="Cerrar carrito">X</button>
+      </div>
+
+      <div class="drawer__body" id="cartItems"></div>
+
+      <div class="drawer__foot">
+        <div class="total">
+          <div class="total__label">Total</div>
+          <div class="total__value" id="cartTotal">$ 0</div>
         </div>
-      `;
-      div.addEventListener("click", async (e) => {
-        const t = e.target.closest("[data-toggle]");
-        const d = e.target.closest("[data-del]");
-        try {
-          if (t) { await setActive(t.getAttribute("data-toggle"), !p.active); await renderList(); }
-          if (d) { await deleteProduct(d.getAttribute("data-del")); await renderList(); }
-        } catch (err) {
-          console.error(err);
-          showNote($("listMsg"), `Error: ${err.message || err}`, "err");
-        }
-      });
-      holder.appendChild(div);
-    }
-  } catch (err) {
-    console.error(err);
-    showNote($("listMsg"), `Error cargando lista: ${err.message || err}`, "err");
-  }
-}
+        <button class="btn btn--primary btn--lg w100" id="sendWhats" type="button">Enviar pedido por WhatsApp</button>
+        <button class="btn btn--soft w100" id="clearCart" type="button">Vaciar carrito</button>
+      </div>
+    </div>
+  </div>
 
-function parsePriceToInt(raw){
-  const s = safeText(raw).replace(",", ".");
-  const n = Number(s);
-  if (!Number.isFinite(n)) return 0;
-  return Math.round(n);
-}
+  <div class="modal" id="modal" aria-hidden="true">
+    <div class="modal__backdrop" id="modalBackdrop"></div>
+    <div class="modal__panel" role="dialog" aria-modal="true" aria-label="Detalle del producto">
+      <div class="modal__top">
+        <div class="modal__title" id="mTitle">Producto</div>
+        <button class="iconBtn" id="modalClose" type="button" aria-label="Cerrar">X</button>
+      </div>
 
-async function boot(){
-  showNote($("authMsg"), "", "");
-  showNote($("panelMsg"), "", "");
-  user = await getSessionUser();
+      <div class="modal__content">
+        <div class="mGallery">
+          <button class="mNav mNav--l" id="mPrev" type="button" aria-label="Anterior">‹</button>
+          <div class="mStage">
+            <img id="mImg" alt="Imagen del producto" />
+          </div>
+          <button class="mNav mNav--r" id="mNext" type="button" aria-label="Siguiente">›</button>
+        </div>
 
-  if (!user) {
-    isAdmin = false;
-    setWhoami(null, false);
-    setUIAuthed(false);
-    showNote($("authMsg"), "Entrá con tu usuario de Supabase Auth.", "");
-    return;
-  }
+        <div class="mThumbs" id="mThumbs"></div>
 
-  isAdmin = await checkAdminWhitelist(user.id);
-  setWhoami(user, isAdmin);
+        <div class="mInfo">
+          <div class="mBadges" id="mBadges"></div>
+          <div class="mPrice" id="mPrice">$ 0</div>
+          <div class="mCat" id="mCat"></div>
+          <div class="mDesc" id="mDesc"></div>
 
-  if (!isAdmin) {
-    setUIAuthed(false);
-    showNote($("authMsg"), "No autorizado. Tu UID no esta habilitado en admin_users o RLS bloquea el SELECT.", "err");
-    return;
-  }
+          <div class="mActions">
+            <button class="btn btn--primary" id="mAdd" type="button">Agregar al carrito</button>
+            <button class="btn btn--soft" id="mAsk" type="button">Consultar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 
-  setUIAuthed(true);
-  resetImage();
-  await renderList();
-  showNote($("panelMsg"), `Listo. Bucket: ${BUCKET}`, "ok");
-}
+  <footer class="footer">
+    <div class="wrap footer__inner">
+      <div class="footer__left">
+        <div class="footer__brand">Di Pietro Comercial</div>
+        <div class="footer__muted">Cocinas | Sommiers | Placares | Insumos</div>
+      </div>
 
-async function init(){
-  $("btnRefresh").addEventListener("click", boot);
+      <div class="footer__right">
+        <a class="footer__link" id="igLinkFooter" href="#" target="_blank" rel="noopener">Instagram</a>
+        <a class="footer__link" id="waLinkFooter" href="#" target="_blank" rel="noopener">WhatsApp</a>
+        <a class="footer__credit" href="https://ciborg347.onrender.com" target="_blank" rel="noopener">Creado y diseñado por Ciborg 347</a>
+      </div>
+    </div>
+  </footer>
 
-  $("btnLogin").addEventListener("click", async () => {
-    showNote($("authMsg"), "Entrando...", "");
-    const email = safeText($("email").value);
-    const password = safeText($("pass").value);
-    const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
-    if (error) { showNote($("authMsg"), `Error login: ${error.message}`, "err"); return; }
-    user = data?.user || null;
-    await boot();
-  });
-
-  $("btnLogout").addEventListener("click", async () => {
-    await supabaseClient.auth.signOut();
-    location.reload();
-  });
-
-  $("p_img").addEventListener("change", async (e) => {
-    const file = e.target.files && e.target.files[0] ? e.target.files[0] : null;
-    await uploadFile(file);
-  });
-
-  $("btnClearImage").addEventListener("click", resetImage);
-
-  $("btnPublish").addEventListener("click", async () => {
-    try {
-      showNote($("panelMsg"), "Publicando...", "");
-      if (!uploaded.publicUrl) { showNote($("panelMsg"), "Falta imagen subida (publicUrl).", "err"); return; }
-
-      const name = safeText($("p_name").value);
-      const price = parsePriceToInt($("p_price").value);
-      const category = safeText($("p_category").value) || "Otros";
-      const description = safeText($("p_desc").value);
-
-      if (!name) { showNote($("panelMsg"), "Falta nombre.", "err"); return; }
-      if (!price || price <= 0) { showNote($("panelMsg"), "Precio invalido.", "err"); return; }
-
-      await createProduct({ name, price, category, description, image_url: uploaded.publicUrl, badges: [], active: true });
-
-      showNote($("panelMsg"), "Producto publicado OK.", "ok");
-      $("p_name").value = "";
-      $("p_price").value = "";
-      $("p_desc").value = "";
-      $("p_category").value = "Otros";
-      resetImage();
-      await renderList();
-    } catch (err) {
-      console.error(err);
-      showNote($("panelMsg"), `Error: ${err.message || err}`, "err");
-    }
-  });
-
-  await boot();
-}
-
-init();
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="./app.js"></script>
+</body>
+</html>
