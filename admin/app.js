@@ -1,4 +1,4 @@
-admin/app.js
+// admin/app.js
 const SUPABASE_URL = "https://tgzcpnhrqyvldvbbbuen.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_5ww2RCVjjnHS8P1T2n9FZw_wzZr4ZAg";
 const BUCKET = "imagenes y videos di pietro";
@@ -9,25 +9,25 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 const $ = (id) => document.getElementById(id);
 function safeText(s){ return (s || "").toString().trim(); }
 function moneyARS(n){
-const v = Number(n || 0);
-return v.toLocaleString("es-AR", { style:"currency", currency:"ARS", maximumFractionDigits:0 });
+  const v = Number(n || 0);
+  return v.toLocaleString("es-AR", { style:"currency", currency:"ARS", maximumFractionDigits:0 });
 }
 function showNote(el, msg, type){
-el.hidden = !msg;
-el.textContent = msg ? safeText(msg) : "";
-el.classList.remove("note--err","note--ok");
-if (type === "err") el.classList.add("note--err");
-if (type === "ok") el.classList.add("note--ok");
+  el.hidden = !msg;
+  el.textContent = msg ? safeText(msg) : "";
+  el.classList.remove("note--err","note--ok");
+  if (type === "err") el.classList.add("note--err");
+  if (type === "ok") el.classList.add("note--ok");
 }
 function setWhoami(user, admin){
-if (!user) { $("whoami").textContent = "No autenticado"; return; }
-$("whoami").textContent = `${user.email || "sin-email"} | uid: ${user.id} | ${admin ? "ADMIN" : "NO ADMIN"}`;
+  if (!user) { $("whoami").textContent = "No autenticado"; return; }
+  $("whoami").textContent = `${user.email || "sin-email"} | uid: ${user.id} | ${admin ? "ADMIN" : "NO ADMIN"}`;
 }
 function setUIAuthed(on){
-$("authCard").hidden = on;
-$("panelCard").hidden = !on;
-$("listCard").hidden = !on;
-$("btnLogout").hidden = !on;
+  $("authCard").hidden = on;
+  $("panelCard").hidden = !on;
+  $("listCard").hidden = !on;
+  $("btnLogout").hidden = !on;
 }
 
 let user = null;
@@ -35,214 +35,223 @@ let isAdmin = false;
 let uploaded = { path:null, publicUrl:null };
 
 async function getSessionUser(){
-const { data, error } = await supabaseClient.auth.getSession();
-if (error) return null;
-return data?.session?.user || null;
+  const { data, error } = await supabaseClient.auth.getSession();
+  if (error) return null;
+  return data?.session?.user || null;
 }
 async function checkAdminWhitelist(uid){
-if (!uid) return false;
-const { data, error } = await supabaseClient
-.from("admin_users")
-.select("user_id")
-.eq("user_id", uid)
-.maybeSingle();
-if (error) { console.error("checkAdmin error:", error); return false; }
-return !!data?.user_id;
+  if (!uid) return false;
+  const { data, error } = await supabaseClient
+    .from("admin_users")
+    .select("user_id")
+    .eq("user_id", uid)
+    .maybeSingle();
+  if (error) { console.error("checkAdmin error:", error); return false; }
+  return !!data?.user_id;
 }
 
 function resetImage(){
-uploaded = { path:null, publicUrl:null };
-$("p_img").value = "";
-$("imgPreview").removeAttribute("src");
-$("btnPublish").disabled = true;
-$("btnViewRemote").hidden = true;
-$("btnClearImage").hidden = true;
-$("imgHint").textContent = "Selecciona una imagen. Primero preview local, luego upload a Storage.";
-$("imgStatus").hidden = true;
-$("imgStatus").textContent = "";
+  uploaded = { path:null, publicUrl:null };
+  $("p_img").value = "";
+  $("imgPreview").removeAttribute("src");
+  $("btnPublish").disabled = true;
+  $("btnViewRemote").hidden = true;
+  $("btnClearImage").hidden = true;
+  $("imgHint").textContent = "Selecciona una imagen. Primero preview local, luego upload a Storage.";
+  $("imgStatus").hidden = true;
+  $("imgStatus").textContent = "";
 }
 async function uploadFile(file){
-uploaded = { path:null, publicUrl:null };
-$("btnPublish").disabled = true;
-$("btnViewRemote").hidden = true;
-$("btnClearImage").hidden = true;
-if (!file) return;
+  uploaded = { path:null, publicUrl:null };
+  $("btnPublish").disabled = true;
+  $("btnViewRemote").hidden = true;
+  $("btnClearImage").hidden = true;
+  if (!file) return;
 
-try { $("imgPreview").src = URL.createObjectURL(file); } catch {}
+  try { $("imgPreview").src = URL.createObjectURL(file); } catch {}
 
-$("imgHint").textContent = "Subiendo imagen a Supabase Storage...";
-$("imgStatus").hidden = false;
-$("imgStatus").textContent = `Bucket: ${BUCKET}`;
+  $("imgHint").textContent = "Subiendo imagen a Supabase Storage...";
+  $("imgStatus").hidden = false;
+  $("imgStatus").textContent = `Bucket: ${BUCKET}`;
 
-const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
-const base = `${Date.now()}-${Math.random().toString(16).slice(2)}`;
-const path = `${PRODUCTS_DIR}/${base}.${ext}`;
+  const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
+  const base = `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+  const path = `${PRODUCTS_DIR}/${base}.${ext}`;
 
-const { error: upErr } = await supabaseClient.storage
-.from(BUCKET)
-.upload(path, file, { upsert:false, cacheControl:"3600" });
+  const { error: upErr } = await supabaseClient.storage
+    .from(BUCKET)
+    .upload(path, file, { upsert:false, cacheControl:"3600" });
 
-if (upErr) {
-console.error("upload error:", upErr);
-$("imgHint").textContent = "Error al subir la imagen.";
-$("imgStatus").textContent = `${upErr.message || upErr}`;
-return;
-}
+  if (upErr) {
+    console.error("upload error:", upErr);
+    $("imgHint").textContent = "Error al subir la imagen.";
+    $("imgStatus").textContent = `${upErr.message || upErr}`;
+    return;
+  }
 
-const { data: pub } = supabaseClient.storage.from(BUCKET).getPublicUrl(path);
-const publicUrl = pub?.publicUrl || null;
+  const { data: pub } = supabaseClient.storage.from(BUCKET).getPublicUrl(path);
+  const publicUrl = pub?.publicUrl || null;
 
-uploaded = { path, publicUrl };
+  uploaded = { path, publicUrl };
 
-$("imgHint").textContent = "Imagen subida OK.";
-$("imgStatus").textContent = publicUrl ? "OK (publicUrl generada)" : "OK (pero sin publicUrl)";
-$("btnClearImage").hidden = false;
+  $("imgHint").textContent = "Imagen subida OK.";
+  $("imgStatus").textContent = publicUrl ? "OK (publicUrl generada)" : "OK (pero sin publicUrl)";
+  $("btnClearImage").hidden = false;
 
-if (publicUrl) {
-$("btnViewRemote").hidden = false;
-$("btnViewRemote").onclick = () => window.open(publicUrl, "_blank", "noopener");
-$("btnPublish").disabled = false;
-} else {
-$("btnPublish").disabled = true;
-}
+  if (publicUrl) {
+    $("btnViewRemote").hidden = false;
+    $("btnViewRemote").onclick = () => window.open(publicUrl, "_blank", "noopener");
+    $("btnPublish").disabled = false;
+  } else {
+    $("btnPublish").disabled = true;
+  }
 }
 
 async function createProduct(payload){
-const { error } = await supabaseClient.from("products").insert(payload);
-if (error) throw error;
+  const { error } = await supabaseClient.from("products").insert(payload);
+  if (error) throw error;
 }
 async function fetchProducts(){
-const { data, error } = await supabaseClient
-.from("products")
-.select("id,name,price,category,active,created_at")
-.order("created_at", { ascending:false });
-if (error) throw error;
-return Array.isArray(data) ? data : [];
+  const { data, error } = await supabaseClient
+    .from("products")
+    .select("id,name,price,category,active,created_at")
+    .order("created_at", { ascending:false });
+  if (error) throw error;
+  return Array.isArray(data) ? data : [];
 }
 async function setActive(id, active){
-const { error } = await supabaseClient.from("products").update({ active }).eq("id", id);
-if (error) throw error;
+  const { error } = await supabaseClient.from("products").update({ active }).eq("id", id);
+  if (error) throw error;
 }
 async function deleteProduct(id){
-const { error } = await supabaseClient.from("products").delete().eq("id", id);
-if (error) throw error;
+  const { error } = await supabaseClient.from("products").delete().eq("id", id);
+  if (error) throw error;
 }
 
 async function renderList(){
-const holder = $("list");
-holder.innerHTML = "";
-showNote($("listMsg"), "", "");
-try {
-const items = await fetchProducts();
-if (!items.length) {
-holder.innerHTML = `<div class="status">No hay productos todavia.</div>`;
-return;
-}
-for (const p of items) {
-const div = document.createElement("div");
-div.className = "item";
-div.innerHTML = `         <div>           <div class="itemTitle">${safeText(p.name)}</div>           <div class="itemMeta">${safeText(p.category)} - ${moneyARS(p.price)} - ${p.active ? "ACTIVO" : "OCULTO"}</div>         </div>         <div class="itemActions">           <button class="btn btn--soft" type="button" data-toggle="${p.id}">${p.active ? "Ocultar" : "Activar"}</button>           <button class="btn btn--danger" type="button" data-del="${p.id}">Borrar</button>         </div>
+  const holder = $("list");
+  holder.innerHTML = "";
+  showNote($("listMsg"), "", "");
+  try {
+    const items = await fetchProducts();
+    if (!items.length) {
+      holder.innerHTML = `<div class="status">No hay productos todavia.</div>`;
+      return;
+    }
+    for (const p of items) {
+      const div = document.createElement("div");
+      div.className = "item";
+      div.innerHTML = `
+        <div>
+          <div class="itemTitle">${safeText(p.name)}</div>
+          <div class="itemMeta">${safeText(p.category)} - ${moneyARS(p.price)} - ${p.active ? "ACTIVO" : "OCULTO"}</div>
+        </div>
+        <div class="itemActions">
+          <button class="btn btn--soft" type="button" data-toggle="${p.id}">${p.active ? "Ocultar" : "Activar"}</button>
+          <button class="btn btn--danger" type="button" data-del="${p.id}">Borrar</button>
+        </div>
       `;
-div.addEventListener("click", async (e) => {
-const t = e.target.closest("[data-toggle]");
-const d = e.target.closest("[data-del]");
-try {
-if (t) { await setActive(t.getAttribute("data-toggle"), !p.active); await renderList(); }
-if (d) { await deleteProduct(d.getAttribute("data-del")); await renderList(); }
-} catch (err) {
-console.error(err);
-showNote($("listMsg"), `Error: ${err.message || err}`, "err");
-}
-});
-holder.appendChild(div);
-}
-} catch (err) {
-console.error(err);
-showNote($("listMsg"), `Error cargando lista: ${err.message || err}`, "err");
-}
+      div.addEventListener("click", async (e) => {
+        const t = e.target.closest("[data-toggle]");
+        const d = e.target.closest("[data-del]");
+        try {
+          if (t) { await setActive(t.getAttribute("data-toggle"), !p.active); await renderList(); }
+          if (d) { await deleteProduct(d.getAttribute("data-del")); await renderList(); }
+        } catch (err) {
+          console.error(err);
+          showNote($("listMsg"), `Error: ${err.message || err}`, "err");
+        }
+      });
+      holder.appendChild(div);
+    }
+  } catch (err) {
+    console.error(err);
+    showNote($("listMsg"), `Error cargando lista: ${err.message || err}`, "err");
+  }
 }
 
 async function boot(){
-showNote($("authMsg"), "", "");
-showNote($("panelMsg"), "", "");
-user = await getSessionUser();
-if (!user) {
-isAdmin = false;
-setWhoami(null, false);
-setUIAuthed(false);
-showNote($("authMsg"), "Entrá con tu usuario de Supabase Auth.", "");
-return;
-}
-isAdmin = await checkAdminWhitelist(user.id);
-setWhoami(user, isAdmin);
-if (!isAdmin) {
-setUIAuthed(false);
-showNote($("authMsg"), "No autorizado. Tu UID no esta habilitado en admin_users o RLS bloquea el SELECT.", "err");
-return;
-}
-setUIAuthed(true);
-resetImage();
-await renderList();
-showNote($("panelMsg"), `Listo. Bucket: ${BUCKET}`, "ok");
+  showNote($("authMsg"), "", "");
+  showNote($("panelMsg"), "", "");
+  user = await getSessionUser();
+
+  if (!user) {
+    isAdmin = false;
+    setWhoami(null, false);
+    setUIAuthed(false);
+    showNote($("authMsg"), "Entrá con tu usuario de Supabase Auth.", "");
+    return;
+  }
+
+  isAdmin = await checkAdminWhitelist(user.id);
+  setWhoami(user, isAdmin);
+
+  if (!isAdmin) {
+    setUIAuthed(false);
+    showNote($("authMsg"), "No autorizado. Tu UID no esta habilitado en admin_users o RLS bloquea el SELECT.", "err");
+    return;
+  }
+
+  setUIAuthed(true);
+  resetImage();
+  await renderList();
+  showNote($("panelMsg"), `Listo. Bucket: ${BUCKET}`, "ok");
 }
 
 async function init(){
-$("btnRefresh").addEventListener("click", boot);
+  $("btnRefresh").addEventListener("click", boot);
 
-$("btnLogin").addEventListener("click", async () => {
-showNote($("authMsg"), "Entrando...", "");
-const email = safeText($("email").value);
-const password = safeText($("pass").value);
-const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
-if (error) { showNote($("authMsg"), `Error login: ${error.message}`, "err"); return; }
-user = data?.user || null;
-await boot();
-});
+  $("btnLogin").addEventListener("click", async () => {
+    showNote($("authMsg"), "Entrando...", "");
+    const email = safeText($("email").value);
+    const password = safeText($("pass").value);
+    const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+    if (error) { showNote($("authMsg"), `Error login: ${error.message}`, "err"); return; }
+    user = data?.user || null;
+    await boot();
+  });
 
-$("btnLogout").addEventListener("click", async () => {
-await supabaseClient.auth.signOut();
-location.reload();
-});
+  $("btnLogout").addEventListener("click", async () => {
+    await supabaseClient.auth.signOut();
+    location.reload();
+  });
 
-$("p_img").addEventListener("change", async (e) => {
-const file = e.target.files && e.target.files[0] ? e.target.files[0] : null;
-await uploadFile(file);
-});
+  $("p_img").addEventListener("change", async (e) => {
+    const file = e.target.files && e.target.files[0] ? e.target.files[0] : null;
+    await uploadFile(file);
+  });
 
-$("btnClearImage").addEventListener("click", resetImage);
+  $("btnClearImage").addEventListener("click", resetImage);
 
-$("btnPublish").addEventListener("click", async () => {
-try {
-showNote($("panelMsg"), "Publicando...", "");
-if (!uploaded.publicUrl) { showNote($("panelMsg"), "Falta imagen subida (publicUrl).", "err"); return; }
+  $("btnPublish").addEventListener("click", async () => {
+    try {
+      showNote($("panelMsg"), "Publicando...", "");
+      if (!uploaded.publicUrl) { showNote($("panelMsg"), "Falta imagen subida (publicUrl).", "err"); return; }
 
-```
-  const name = safeText($("p_name").value);
-  const price = Number($("p_price").value || 0);
-  const category = safeText($("p_category").value) || "Otros";
-  const description = safeText($("p_desc").value);
+      const name = safeText($("p_name").value);
+      const price = Number($("p_price").value || 0);
+      const category = safeText($("p_category").value) || "Otros";
+      const description = safeText($("p_desc").value);
 
-  if (!name) { showNote($("panelMsg"), "Falta nombre.", "err"); return; }
-  if (!price || price <= 0) { showNote($("panelMsg"), "Precio invalido.", "err"); return; }
+      if (!name) { showNote($("panelMsg"), "Falta nombre.", "err"); return; }
+      if (!price || price <= 0) { showNote($("panelMsg"), "Precio invalido.", "err"); return; }
 
-  await createProduct({ name, price, category, description, image_url: uploaded.publicUrl, badges: [], active: true });
+      await createProduct({ name, price, category, description, image_url: uploaded.publicUrl, badges: [], active: true });
 
-  showNote($("panelMsg"), "Producto publicado OK.", "ok");
-  $("p_name").value = "";
-  $("p_price").value = "";
-  $("p_desc").value = "";
-  $("p_category").value = "Otros";
-  resetImage();
-  await renderList();
-} catch (err) {
-  console.error(err);
-  showNote($("panelMsg"), `Error: ${err.message || err}`, "err");
-}
-```
+      showNote($("panelMsg"), "Producto publicado OK.", "ok");
+      $("p_name").value = "";
+      $("p_price").value = "";
+      $("p_desc").value = "";
+      $("p_category").value = "Otros";
+      resetImage();
+      await renderList();
+    } catch (err) {
+      console.error(err);
+      showNote($("panelMsg"), `Error: ${err.message || err}`, "err");
+    }
+  });
 
-});
-
-await boot();
+  await boot();
 }
 
 init();
