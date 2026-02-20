@@ -1,21 +1,19 @@
+// public/app.js
 const SUPABASE_URL = "https://tgzcpnhrqyvldvbbbuen.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_5ww2RCVjjnHS8P1T2n9FZw_wzZr4ZAg";
 const WHATSAPP_NUMBER = "5491164312020";
 const INSTAGRAM_URL = "https://www.instagram.com/dipietro_comercial?igsh=MW50cGRta3c5MmMyNg==";
 
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
 const $ = (id) => document.getElementById(id);
 
 function moneyARS(n) {
   const v = Number(n || 0);
   return v.toLocaleString("es-AR", { style: "currency", currency: "ARS", maximumFractionDigits: 0 });
 }
-
 function waLink(text) {
   return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(text)}`;
 }
-
 function safeText(s) {
   return (s || "").toString().trim();
 }
