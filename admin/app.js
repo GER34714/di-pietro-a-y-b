@@ -5,7 +5,8 @@ const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiO
 const BUCKET_NAME = "product-images";
 const UPLOAD_PREFIX = "products/";
 
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+// IMPORTANT: avoid clashing with global "supabase" from CDN by naming the client "sb"
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
 
 const authBox = document.getElementById("authBox");
 const adminBox = document.getElementById("adminBox");
@@ -51,11 +52,11 @@ function money(n){
 }
 
 async function whitelistCheck(){
-  const { data } = await supabase.auth.getUser();
+  const { data } = await sb.auth.getUser();
   const email = data?.user?.email || "";
   if(!email) return { ok:false, reason:"No hay sesion activa." };
 
-  const { data: row, error } = await supabase
+  const { data: row, error } = await sb
     .from("admin_users")
     .select("email")
     .eq("email", email)
@@ -72,7 +73,7 @@ async function whitelistCheck(){
 }
 
 async function guardAdmin(){
-  const { data } = await supabase.auth.getSession();
+  const { data } = await sb.auth.getSession();
   const session = data?.session;
 
   if(!session){
@@ -85,7 +86,7 @@ async function guardAdmin(){
   const check = await whitelistCheck();
   if(!check.ok){
     setAuthMsg(check.reason);
-    await supabase.auth.signOut();
+    await sb.auth.signOut();
     authBox.style.display = "block";
     adminBox.style.display = "none";
     userEmail.textContent = "";
@@ -109,7 +110,7 @@ loginBtn.addEventListener("click", async ()=>{
     return;
   }
 
-  const { error } = await supabase.auth.signInWithPassword({ email, password });
+  const { error } = await sb.auth.signInWithPassword({ email, password });
   if(error){
     console.error(error);
     setAuthMsg(`No autenticado: ${error.message}`);
@@ -120,7 +121,7 @@ loginBtn.addEventListener("click", async ()=>{
 });
 
 logoutBtn.addEventListener("click", async ()=>{
-  await supabase.auth.signOut();
+  await sb.auth.signOut();
   resetFormState();
   setAdminMsg("");
   setAuthMsg("");
@@ -141,7 +142,7 @@ async function uploadSelectedImage(file){
   const ext = (file.name.split(".").pop() || "jpg").toLowerCase().replace(/[^a-z0-9]/g,"") || "jpg";
   const path = `${UPLOAD_PREFIX}${Date.now()}_${Math.random().toString(16).slice(2)}.${ext}`;
 
-  const { error: upErr } = await supabase
+  const { error: upErr } = await sb
     .storage
     .from(BUCKET_NAME)
     .upload(path, file, { upsert:false, contentType:file.type });
@@ -152,7 +153,7 @@ async function uploadSelectedImage(file){
     return false;
   }
 
-  const { data: pub } = supabase.storage.from(BUCKET_NAME).getPublicUrl(path);
+  const { data: pub } = sb.storage.from(BUCKET_NAME).getPublicUrl(path);
   uploadedImageUrl = pub?.publicUrl || "";
   uploadedImagePath = path;
 
@@ -212,7 +213,7 @@ publishBtn.addEventListener("click", async ()=>{
 
   setAdminMsg("Publicando producto...");
 
-  const { error } = await supabase
+  const { error } = await sb
     .from("products")
     .insert([{ name, description, price, category, image_url: uploadedImageUrl, active }]);
 
@@ -236,7 +237,7 @@ publishBtn.addEventListener("click", async ()=>{
 async function loadProductsList(){
   setAdminMsg("");
 
-  const { data, error } = await supabase
+  const { data, error } = await sb
     .from("products")
     .select("id,name,price,category,active,created_at")
     .order("created_at", { ascending:false })
@@ -279,7 +280,7 @@ async function loadProductsList(){
 
       btn.disabled = true;
 
-      const { error: upErr } = await supabase
+      const { error: upErr } = await sb
         .from("products")
         .update({ active: !current.active })
         .eq("id", id);
@@ -302,7 +303,7 @@ async function loadProductsList(){
 
       btn.disabled = true;
 
-      const { error: delErr } = await supabase
+      const { error: delErr } = await sb
         .from("products")
         .delete()
         .eq("id", id);
@@ -318,5 +319,5 @@ async function loadProductsList(){
   });
 }
 
-supabase.auth.onAuthStateChange(()=>{ guardAdmin(); });
+sb.auth.onAuthStateChange(()=>{ guardAdmin(); });
 guardAdmin();
